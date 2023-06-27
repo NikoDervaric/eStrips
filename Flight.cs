@@ -43,6 +43,8 @@ namespace eStrips
         public Flightplan Flightplan { get; set; }
         public double ComputedCFL { get; set; }
         public int AppliedXFL { get; set; }
+        public string InSector { get; set; }
+        public string OutSector { get; set; }
 
         // Functions
         public override string ToString()
@@ -54,11 +56,10 @@ namespace eStrips
         public string[] ShowFlight()
         {
 
-            if (AltLbl != "") { ComputedCFL = int.Parse(AltLbl); } 
+            if (AltLbl != "") { ComputedCFL = int.Parse(AltLbl); }
             else { ComputedCFL = Flightplan.CruiseAlt; }
-            Console.WriteLine(ComputedCFL);
 
-            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
+            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{InSector/*Flightplan.AcType*/}", $"{Flightplan.CruiseSpd}", $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }
     }
 

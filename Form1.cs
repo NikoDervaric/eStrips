@@ -133,7 +133,6 @@ namespace eStrips
                 }
             }
             return waypoints;
-
         }
 
         private void LoadLoAs()
