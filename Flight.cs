@@ -56,7 +56,7 @@ namespace eStrips
         public string[] ShowFlight()
         {
 
-            if (AltLbl != "") { ComputedCFL = int.Parse(AltLbl); }
+            if (int.TryParse(AltLbl, out int _)) { ComputedCFL = int.Parse(AltLbl); }
             else { ComputedCFL = Flightplan.CruiseAlt; }
 
             return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{InSector/*Flightplan.AcType*/}", $"{Flightplan.CruiseSpd}", $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };

@@ -70,14 +70,15 @@
             this.stripDataTable.Dock = System.Windows.Forms.DockStyle.Fill;
             this.stripDataTable.Location = new System.Drawing.Point(0, 0);
             this.stripDataTable.Margin = new System.Windows.Forms.Padding(0);
+            this.stripDataTable.MultiSelect = false;
             this.stripDataTable.Name = "stripDataTable";
             this.stripDataTable.ReadOnly = true;
             this.stripDataTable.RowTemplate.Height = 35;
             this.stripDataTable.RowTemplate.ReadOnly = true;
             this.stripDataTable.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.stripDataTable.Size = new System.Drawing.Size(1094, 661);
+            this.stripDataTable.Size = new System.Drawing.Size(1079, 661);
             this.stripDataTable.TabIndex = 0;
-            this.stripDataTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellClick);
+            this.stripDataTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellDoubleClick);
             // 
             // callsign_column
             // 
@@ -241,7 +242,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.ClientSize = new System.Drawing.Size(1094, 661);
+            this.ClientSize = new System.Drawing.Size(1079, 661);
             this.Controls.Add(this.stripDataTable);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "eStrips";

@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Timers;
 using System.Threading;
+using System.Security.Permissions;
 
 namespace eStrips
 {
@@ -50,6 +51,9 @@ namespace eStrips
         //  STYLING
         private void StyleStripTable()
         {
+            //stripDataTable.RowHeadersVisible = false;
+            stripDataTable.RowHeadersWidth = 25;
+
             //Change cell font
             foreach (DataGridViewColumn c in stripDataTable.Columns)
             {
@@ -98,12 +102,22 @@ namespace eStrips
         }
 
         //  TODO - Generate squawk upon clicking PSSR field
-        private void stripDataTable_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void stripDataTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == 10)
+            if (e.ColumnIndex == 12)
             {
+                DataGridViewTextBoxCell route = (DataGridViewTextBoxCell) stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                DataGridViewTextBoxCell adep = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex - 4];
+                DataGridViewTextBoxCell ades = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex - 3];
 
+                string[] parts = route.Value.ToString().Split(' ');
+
+                string fullRoute = adep.Value.ToString() + "%20" + string.Join("%20", parts) + "%20" + ades.Value.ToString();
+                //Log(fullRoute);
+                
+                System.Diagnostics.Process.Start($"https://skyvector.com/?ll=46.12757152789378,14.788330080764661&chart=304&zoom=5&fpl={fullRoute}");
             }
+            else { return; }
         }
 
         private Coordinate[] LoadAirac()
@@ -253,7 +267,7 @@ namespace eStrips
             string[] trafficInRange = radarResponse.Split(';');
             trafficInRange = trafficInRange.Skip(1).ToArray();
 
-            Log("=====ValidateFlights()=====");
+            //Log("=====ValidateFlights()=====");
             foreach (string traffic in trafficInRange)
             {
 
@@ -355,6 +369,5 @@ namespace eStrips
             PopulateDataGridView(validFlights);
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
         }
-
     }
 }
