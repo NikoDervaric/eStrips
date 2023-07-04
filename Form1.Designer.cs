@@ -76,8 +76,9 @@
             this.stripDataTable.RowTemplate.Height = 35;
             this.stripDataTable.RowTemplate.ReadOnly = true;
             this.stripDataTable.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.stripDataTable.Size = new System.Drawing.Size(1079, 661);
+            this.stripDataTable.Size = new System.Drawing.Size(1039, 661);
             this.stripDataTable.TabIndex = 0;
+            this.stripDataTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellClick);
             this.stripDataTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellDoubleClick);
             // 
             // callsign_column
@@ -122,12 +123,12 @@
             this.route_column.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.route_column.HeaderText = "ROUTE";
             this.route_column.MaxInputLength = 20;
-            this.route_column.MinimumWidth = 125;
+            this.route_column.MinimumWidth = 120;
             this.route_column.Name = "route_column";
             this.route_column.ReadOnly = true;
             this.route_column.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.route_column.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.route_column.Width = 125;
+            this.route_column.Width = 120;
             // 
             // dct_column
             // 
@@ -158,10 +159,12 @@
             // 
             this.actype_column.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.actype_column.HeaderText = "TYPE";
+            this.actype_column.MaxInputLength = 4;
             this.actype_column.Name = "actype_column";
             this.actype_column.ReadOnly = true;
             this.actype_column.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.actype_column.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.actype_column.Width = 65;
             // 
             // speed_column
             // 
@@ -242,7 +245,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.ClientSize = new System.Drawing.Size(1079, 661);
+            this.ClientSize = new System.Drawing.Size(1039, 661);
             this.Controls.Add(this.stripDataTable);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "eStrips";

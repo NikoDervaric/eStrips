@@ -13,26 +13,31 @@ using System.Net.Sockets;
 using System.Timers;
 using System.Threading;
 using System.Security.Permissions;
+using System.Runtime.CompilerServices;
 
 namespace eStrips
 {
     public partial class eStrips : Form
     {
         private System.Timers.Timer timer;
-        private const string serverAddress = "127.0.0.1";   // Replace with your server IP address
-        private const int serverPort = 1130;                // Replace with your server port number
-        private const int sendInterval = 15000;              // Interval between sending messages (in milliseconds)
+        private const string serverAddress = "127.0.0.1";       // Replace with your server IP address
+        private const int serverPort = 1130;                    // Replace with your server port number
+        private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
+
+        private List<Segment> mainSector = new List<Segment>();
+        private List<Flight> validFlights = new List<Flight>();
 
         //LoAs
-        private Dictionary<string, Dictionary<string, int>> arrivalLoa = new Dictionary<string, Dictionary<string, int>>();
-        private Dictionary<string, Dictionary<string, int>> departureLoa = new Dictionary<string, Dictionary<string, int>>();
-        private Dictionary<string, Dictionary<string, int>> overflightLoa = new Dictionary<string, Dictionary<string, int>>();
+        //WRITE THE LOASSS
 
         public eStrips()
         {
             InitializeComponent();
 
             Coordinate[] Airac = LoadAirac();
+            Log("Loaded AIRAC.");
+            LoadSector();
+            Log("Loaded sector.");
 
             StyleStripTable();
             //PopulateDataGridView();
@@ -95,13 +100,14 @@ namespace eStrips
             Invoke(new Action(() =>
             {
                 // Update UI controls or display the response
-                List<Flight> validFlights = ValidateFlights(response);
+
+                //List<Flight> validFlights = ValidateFlights(response);
                 PopulateDataGridView(validFlights);
                 stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
             }));
         }
 
-        //  TODO - Generate squawk upon clicking PSSR field
+        //  Open route on double-click
         private void stripDataTable_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == 12)
@@ -120,6 +126,29 @@ namespace eStrips
             else { return; }
         }
 
+        //  Generate squawk on clicking PSSR field
+        private void stripDataTable_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == 10)
+            {
+                DataGridViewTextBoxCell pssr = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex - 10];
+
+                string[] squawk = SendCommand($"#TRSQK;{callsign.Value}").Split(';');
+                if (squawk[2] == "Traffic not assumed.") 
+                {
+                    Log("Here:" + callsign.Value.ToString());
+                    pssr.Value = ""; 
+                }
+                else
+                {
+                    
+                    pssr.Value = squawk[2];
+                    SendCommand($"#LBSQK;{callsign.Value};{squawk[2]}");
+                }
+            }
+        }
+
         private Coordinate[] LoadAirac()
         {
             string[] lines = File.ReadAllLines(@"..\..\airac.txt");
@@ -131,9 +160,7 @@ namespace eStrips
 
                 if (parts.Length >= 3)
                 {
-                    waypoints[i].name = parts[0].Trim();
-                    waypoints[i].latitude = double.Parse(parts[1].Trim());
-                    waypoints[i].longitude = double.Parse(parts[2].Trim());
+                    waypoints[i] = new Coordinate(parts[0].Trim(), double.Parse(parts[1].Trim()), double.Parse(parts[2].Trim()), 0);
 
                     //Waypoint logging
                     //Log(waypoints[i].ToString());
@@ -147,6 +174,11 @@ namespace eStrips
                 }
             }
             return waypoints;
+        }
+
+        public void LoadSector()
+        {
+            string filePath = "../../sectors/LJLA.msct";
         }
 
         private void LoadLoAs()
@@ -239,30 +271,24 @@ namespace eStrips
             return false;
         }
 
-        private void PopulateDataGridView(List<Flight> validFlights)//string[][] flights)   
+        private void PopulateDataGridView(List<Flight> validFlights)  
         {
+            stripDataTable.Rows.Clear();
+
+            string response = SendCommand("#TR");
+            ValidateFlights(response);
 
             // Add the data rows to the DataGridView
             foreach (Flight flight in validFlights)
-            {   
-                // Updates the callsigns information!!
-                if (CallsignAlreadyExists(flight.Callsign))
-                {
-                    stripDataTable.Rows.RemoveAt(CallsignIndex(flight.Callsign));
-                    stripDataTable.Rows.Add(flight.ShowFlight());
-                    continue;
-                }
-
+            {
                 stripDataTable.Rows.Add(flight.ShowFlight());
-                //stripDataTable.Columns["planned_cleared_levels_column"].SortMode = DataGridViewColumnSortMode.Programmatic;
-                //stripDataTable.Columns["planned_cleared_levels_column"].HeaderCell.SortGlyphDirection = SortOrder.Descending;
             }
         }
 
         //FLIGHT FILTERING AND PROCESSING
-        private List<Flight> ValidateFlights(string radarResponse)
+        private void ValidateFlights(string radarResponse)
         {
-            List<Flight> validFlights = new List<Flight>();
+            validFlights.Clear();
 
             string[] trafficInRange = radarResponse.Split(';');
             trafficInRange = trafficInRange.Skip(1).ToArray();
@@ -290,12 +316,7 @@ namespace eStrips
                         Track = int.Parse(pos[3]),
                         Altitude = int.Parse(pos[4]),
                         Speed = int.Parse(pos[5]),
-                        Position = new Coordinate {
-                            name = $"{pos[6]};{pos[7]}",
-                            latitude = double.Parse(pos[6]),
-                            longitude = double.Parse(pos[7]),
-                            altitude = int.Parse(pos[4])
-                        },
+                        Position = new Coordinate ($"{pos[6]};{pos[7]}", double.Parse(pos[6]), double.Parse(pos[7]), int.Parse(pos[4])),
                         ASSR = pos[9],
                         PSSR = pos[8],
                         WptLbl = pos[10].PadRight(5, ' '),
@@ -326,7 +347,6 @@ namespace eStrips
                 }
                 else { continue; }
             }
-            return validFlights;
         }
 
         private Coordinate[] ProcessRoute(Flight flight)
@@ -365,9 +385,11 @@ namespace eStrips
             TopMost = true;
             string response = SendCommand("#TR");
 
-            List<Flight> validFlights = ValidateFlights(response);
+            //List<Flight> validFlights = ValidateFlights(response);
+            ValidateFlights(response);
             PopulateDataGridView(validFlights);
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
         }
+
     }
 }

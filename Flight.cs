@@ -4,26 +4,35 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace eStrips
 {
-    internal struct Coordinate
+    internal class Coordinate
     {
         public string name;
         public double latitude;
         public double longitude;
         public int altitude;
 
+        public Coordinate(string name, double  latitude, double longitude, int altitude)
+        {
+            this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.altitude = altitude;
+        }
+
         public override string ToString()
         {
-            return $"{name} | {latitude};{longitude}\n";
+            return $"{name} | {latitude};{longitude}\n @ A/FL{altitude}";
         }
     }
 
     internal struct Segment
     {
-        public Coordinate Wpt1 { get; set; }
-        public Coordinate Wpt2 { get; set; }
+        public Coordinate C1 { get; set; }
+        public Coordinate C2 { get; set; }
     }
 
     internal struct Flight
@@ -43,8 +52,8 @@ namespace eStrips
         public Flightplan Flightplan { get; set; }
         public double ComputedCFL { get; set; }
         public int AppliedXFL { get; set; }
-        public string InSector { get; set; }
-        public string OutSector { get; set; }
+        public string PrevSector { get; set; }
+        public string NextSector { get; set; }
 
         // Functions
         public override string ToString()
@@ -59,7 +68,9 @@ namespace eStrips
             if (int.TryParse(AltLbl, out int _)) { ComputedCFL = int.Parse(AltLbl); }
             else { ComputedCFL = Flightplan.CruiseAlt; }
 
-            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{InSector/*Flightplan.AcType*/}", $"{Flightplan.CruiseSpd}", $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
+            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt.ToString().PadLeft(3, '0').Substring(0, 3)}", 
+                                    $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{/*PrevSector*/Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
+                                    $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }
     }
 
