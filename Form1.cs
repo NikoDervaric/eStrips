@@ -14,6 +14,11 @@ using System.Timers;
 using System.Threading;
 using System.Security.Permissions;
 using System.Runtime.CompilerServices;
+using System.Windows.Shapes;
+using static System.Windows.Forms.LinkLabel;
+using System.Collections;
+using System.Xml.Linq;
+using System.Collections.ObjectModel;
 
 namespace eStrips
 {
@@ -24,22 +29,30 @@ namespace eStrips
         private const int serverPort = 1130;                    // Replace with your server port number
         private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
 
-        private List<Segment> mainSector = new List<Segment>();
         private List<Flight> validFlights = new List<Flight>();
+        private readonly Dictionary<string, Point> Airac;
+        private readonly Sector mainSector;
 
         //LoAs
         //WRITE THE LOASSS
+        // Dictionary<FIX, Dictionary<AIRPORT, WAYPOINT(LAT, LON, LEVEL)>>
+        private readonly Dictionary<string, int> Departures = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> Arrivals = new Dictionary<string, int>();
+        //private readonly Dictionary<string, int> Overflights;
 
         public eStrips()
         {
             InitializeComponent();
 
-            Coordinate[] Airac = LoadAirac();
-            Log("Loaded AIRAC.");
-            LoadSector();
+            mainSector = LoadMainSector();
             Log("Loaded sector.");
+            Airac = LoadAirac();
+            Log("Loaded AIRAC.");
+            LoadLoAs();
+            Log("Loaded LOAs.");
 
             StyleStripTable();
+
             //PopulateDataGridView();
             timer = new System.Timers.Timer(sendInterval);
 
@@ -51,7 +64,6 @@ namespace eStrips
 
             // Start the timer
             timer.Start();
-
         }
         //  STYLING
         private void StyleStripTable()
@@ -81,10 +93,13 @@ namespace eStrips
             stripDataTable.GridColor = Color.Black;
 
             stripDataTable.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI Semibold", 15, GraphicsUnit.Pixel);
+
+            stripDataTable.DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 180, 180, 180);
+            stripDataTable.DefaultCellStyle.SelectionForeColor = Color.Black;
         }
 
         //  LOGGING
-        private void Log(string str)
+        private static void Log(string str)
         {
             Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | " + str);
         }
@@ -149,56 +164,232 @@ namespace eStrips
             }
         }
 
-        private Coordinate[] LoadAirac()
+        public static Dictionary<string, Point> LoadAirac()
         {
             string[] lines = File.ReadAllLines(@"..\..\airac.txt");
-            Coordinate[] waypoints = new Coordinate[lines.Length];
+            var dictionary = new Dictionary<string, Point>();
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (var line in lines)
             {
-                string[] parts = lines[i].Split(';');
+                string[] parts = line.Split(';');
 
-                if (parts.Length >= 3)
+                if (parts.Length == 3)
                 {
-                    waypoints[i] = new Coordinate(parts[0].Trim(), double.Parse(parts[1].Trim()), double.Parse(parts[2].Trim()), 0);
+                    string name = parts[0];
+                    double latitude;
+                    double longitude;
 
-                    //Waypoint logging
-                    //Log(waypoints[i].ToString());
+                    if (double.TryParse(parts[1], out latitude) && double.TryParse(parts[2], out longitude))
+                    {
+                        Point point = new Point { X = latitude, Y = longitude };
+                        dictionary[name] = point;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Invalid latitude or longitude in line: {line}");
+                    }
                 }
                 else
                 {
-                    // Handle invalid lines with insufficient data if needed
-                    waypoints[i].name = "Invalid Waypoint";
-                    waypoints[i].latitude = 0.0;
-                    waypoints[i].longitude = 0.0;
+                    Console.WriteLine($"Invalid line format: {line}");
                 }
             }
-            return waypoints;
+
+            return dictionary;
         }
 
-        public void LoadSector()
+        public Sector LoadMainSector()
         {
             string filePath = "../../sectors/LJLA.msct";
+            var lines = File.ReadAllLines(filePath);
+            var sector = new Sector { Points = new List<Point>() };
+
+            foreach (var line in lines)
+            {
+                var coordinates = line.Split(',');
+                if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double latitude) && double.TryParse(coordinates[1], out double longitude))
+                {
+                    sector.Points.Add(new Point { X = latitude, Y = longitude });
+                }
+                else
+                {
+                    throw new FormatException("Invalid coordinate format in file.");
+                }
+            }
+
+            return sector;
         }
 
+        /*public static bool HasIntersection(List<Line> lines, Sector sector)
+        {
+            foreach (var line in lines)
+            {
+                if (IntersectsSector(line, sector))
+                {
+                    //Log($"{line.Start.X};{line.Start.Y} | {line.End.X};{line.End.Y}");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IntersectsSector(Line line, Sector sector)
+        {
+            foreach (var SectorLine in GetSectorLines(sector))
+            {
+                if (Intersects(line, SectorLine))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static List<Line> GetSectorLines(Sector sector)
+        {
+            var lines = new List<Line>();
+            var count = sector.Points.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                var startPoint = sector.Points[i];
+                var endPoint = sector.Points[(i + 1) % count];
+
+                lines.Add(new Line { Start = startPoint, End = endPoint });
+            }
+
+            return lines;
+        }
+
+        private static bool Intersects(Line line1, Line line2, double tolerance = 0.001)
+        {
+            //  Returns Point of intersection if do intersect otherwise default Point (null)
+            double x1 = line1.Start.X, y1 = line1.Start.Y;
+            double x2 = line1.End.X, y2 = line1.End.Y;
+
+            double x3 = line2.Start.X, y3 = line2.Start.Y;
+            double x4 = line2.End.X, y4 = line2.End.Y;
+
+            // equations of the form x=c (two vertical lines) with overlapping
+            if (Math.Abs(x1 - x2) < tolerance && Math.Abs(x3 - x4) < tolerance && Math.Abs(x1 - x3) < tolerance)
+            {
+                return true;
+            }
+
+            //equations of the form y=c (two horizontal lines) with overlapping
+            if (Math.Abs(y1 - y2) < tolerance && Math.Abs(y3 - y4) < tolerance && Math.Abs(y1 - y3) < tolerance)
+            {
+                return true;
+            }
+
+            //equations of the form x=c (two vertical parallel lines)
+            if (Math.Abs(x1 - x2) < tolerance && Math.Abs(x3 - x4) < tolerance)
+            {
+                //return default (no intersection)
+                return false;
+            }
+
+            //equations of the form y=c (two horizontal parallel lines)
+            if (Math.Abs(y1 - y2) < tolerance && Math.Abs(y3 - y4) < tolerance)
+            {
+                //return default (no intersection)
+                return false;
+            }
+
+            //general equation of line is y = mx + c where m is the slope
+            //assume equation of line 1 as y1 = m1x1 + c1 
+            //=> -m1x1 + y1 = c1 ----(1)
+            //assume equation of line 2 as y2 = m2x2 + c2
+            //=> -m2x2 + y2 = c2 -----(2)
+            //if line 1 and 2 intersect then x1=x2=x & y1=y2=y where (x,y) is the intersection point
+            //so we will get below two equations 
+            //-m1x + y = c1 --------(3)
+            //-m2x + y = c2 --------(4)
+
+            double x, y;
+
+            //lineA is vertical x1 = x2
+            //slope will be infinity
+            //so lets derive another solution
+            if (Math.Abs(x1 - x2) < tolerance)
+            {
+                //compute slope of line 2 (m2) and c2
+                double m2 = (y4 - y3) / (x4 - x3);
+                double c2 = -m2 * x3 + y3;
+
+                //equation of vertical line is x = c
+                //if line 1 and 2 intersect then x1=c1=x
+                //subsitute x=x1 in (4) => -m2x1 + y = c2
+                // => y = c2 + m2x1 
+                return true;
+            }
+            //lineB is vertical x3 = x4
+            //slope will be infinity
+            //so lets derive another solution
+            else if (Math.Abs(x3 - x4) < tolerance)
+            {
+                //compute slope of line 1 (m1) and c2
+                double m1 = (y2 - y1) / (x2 - x1);
+                double c1 = -m1 * x1 + y1;
+
+                //equation of vertical line is x = c
+                //if line 1 and 2 intersect then x3=c3=x
+                //subsitute x=x3 in (3) => -m1x3 + y = c1
+                // => y = c1 + m1x3 
+                return true;
+            }
+            //lineA & lineB are not vertical 
+            //(could be horizontal we can handle it with slope = 0)
+            else
+            {
+                //compute slope of line 1 (m1) and c2
+                double m1 = (y2 - y1) / (x2 - x1);
+                double c1 = -m1 * x1 + y1;
+
+                //compute slope of line 2 (m2) and c2
+                double m2 = (y4 - y3) / (x4 - x3);
+                double c2 = -m2 * x3 + y3;
+
+                //solving equations (3) & (4) => x = (c1-c2)/(m2-m1)
+                //plugging x value in equation (4) => y = c2 + m2 * x
+                x = (c1 - c2) / (m2 - m1);
+                y = c2 + m2 * x;
+
+                //verify by plugging intersection point (x, y)
+                //in orginal equations (1) & (2) to see if they intersect
+                //otherwise x,y values will not be finite and will fail this check
+                if (!(Math.Abs(-m1 * x + y - c1) < tolerance
+                    && Math.Abs(-m2 * x + y - c2) < tolerance))
+                {
+                    //return default (no intersection)
+                    return false;
+                }
+            }
+
+            //return default (no intersection)
+            return false;
+        }
+        */
+        
         private void LoadLoAs()
         {
             string[] lines = File.ReadAllLines(@"..\..\loa.txt");
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (string line in lines)
             {
-                string[] parts = lines[i].Split(';');
+                string[] parts = line.Split(',');
+                string key = parts[1] + parts[2];
+                int loaFL = int.Parse(parts[3]);
 
                 if (parts[0] == "A")
                 {
-                    //arrivalLoa.Add(parts[1], parts[2], int.Parse(parts[3]));
+                    Arrivals.Add(key, loaFL);
                 }
-                else
+                else if (parts[0] == "D")
                 {
-
+                    Departures.Add(key, loaFL);
                 }
             }
-
         }
 
         public static string SendCommand(string command)
@@ -241,36 +432,6 @@ namespace eStrips
         }
 
         //TABLE CHECKING AND DATA POPULATION
-        public int CallsignIndex(string callsign)
-        {
-            int rowIndex = -1;  // Initialize with -1 to indicate value not found
-
-            foreach (DataGridViewRow row in stripDataTable.Rows)
-            {
-                // Replace "ColumnName" with the actual name or index of the column you want to search in
-                if (row.Cells["callsign_column"].Value != null && row.Cells["callsign_column"].Value.ToString() == callsign)
-                {
-                    rowIndex = row.Index;  // Store the row index where the value is found
-                    break;
-                }
-            }
-            return rowIndex;
-        }
-
-        private bool CallsignAlreadyExists(string callsign)
-        {
-            foreach (DataGridViewRow row in stripDataTable.Rows)
-            {
-                // Replace "ColumnName" with the actual name or index of the column you want to check
-                if (row.Cells["callsign_column"].Value != null && row.Cells["callsign_column"].Value.ToString() == callsign)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void PopulateDataGridView(List<Flight> validFlights)  
         {
             stripDataTable.Rows.Clear();
@@ -316,7 +477,7 @@ namespace eStrips
                         Track = int.Parse(pos[3]),
                         Altitude = int.Parse(pos[4]),
                         Speed = int.Parse(pos[5]),
-                        Position = new Coordinate ($"{pos[6]};{pos[7]}", double.Parse(pos[6]), double.Parse(pos[7]), int.Parse(pos[4])),
+                        Position = new Waypoint($"{pos[6]};{pos[7]}", double.Parse(pos[6]), double.Parse(pos[7]), int.Parse(pos[4])),
                         ASSR = pos[9],
                         PSSR = pos[8],
                         WptLbl = pos[10].PadRight(5, ' '),
@@ -340,36 +501,87 @@ namespace eStrips
                             EstimatedFlightTime = fpl[14],
                             Route = fpl[15].Split(' '),
                             Remarks = fpl[16]
-                        }
+                        },
+                        AppliedXFL = 0
                     };
+                    Log(flight.Callsign);
+                    flight.Route = ProcessRoute(flight);
+                    flight.AppliedXFL = ApplyLoA(flight);
+                    Log(flight.AppliedXFL.ToString());
 
                     validFlights.Add(flight);
+
+                    /*if (HasIntersection(flight.Route, mainSector)) 
+                    {
+                        Log(flight.Callsign + " has intersection");
+                        validFlights.Add(flight);
+                    }
+                    else { continue; }*/
                 }
                 else { continue; }
             }
         }
 
-        private Coordinate[] ProcessRoute(Flight flight)
+        private List<Line> ProcessRoute(Flight flight)
         {
+            string[] unprocessed_route = flight.Flightplan.Route;
+            List<Line> route_segments = new List<Line>();
+            List<Point> tmp_route = new List<Point>();
 
-            Coordinate[] route = null;
-
-            return route;
-        }
-
-        //TODO
-        private void CalculateTrajectory(List<Flight> validFlights)
-        {
-            foreach (Flight flight in validFlights)
+            foreach (string wpt in unprocessed_route)
             {
-                // TODO
+                string[] parts = wpt.Split('/');
+
+                if (Airac.ContainsKey(parts[0]))
+                {
+                    Point point = Airac[parts[0]];
+                    tmp_route.Add(point);
+                }
+                /*else
+                {
+                    Console.WriteLine($"Name '{wpt}' not found in the dictionary.");
+                }*/
             }
+
+            var count = tmp_route.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                Point point1 = tmp_route[i];
+                Point point2 = tmp_route[(i + 1) % count];
+
+                route_segments.Add(new Line { Start = point1, End = point2 });
+            }
+
+            return route_segments;
         }
 
-        //TODO ApplyLoa
-        private void ApplyLoA(List<Flight> validFlights)
+        private int ApplyLoA(Flight flight)
         {
+            string ADEP = flight.Flightplan.Adep;
+            string ADES = flight.Flightplan.Ades;
 
+            foreach (string wpt in flight.Flightplan.Route)
+            {
+                string depKey = wpt + ADEP;
+                string arrKey = wpt + ADES;
+
+                if (Departures.ContainsKey(depKey))
+                {
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " WPT: " + wpt);
+                    return Departures[depKey];
+                }
+                else if (Arrivals.ContainsKey(arrKey))
+                {
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
+                    return Arrivals[arrKey];
+                }
+                else
+                {
+                    return flight.Flightplan.CruiseAlt;
+                }
+            }
+            return 0;
         }
 
         //CLOSING
@@ -390,6 +602,5 @@ namespace eStrips
             PopulateDataGridView(validFlights);
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
         }
-
     }
 }

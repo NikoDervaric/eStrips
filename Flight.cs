@@ -8,14 +8,31 @@ using System.Windows.Shapes;
 
 namespace eStrips
 {
-    internal class Coordinate
+    public class Line
     {
-        public string name;
-        public double latitude;
-        public double longitude;
-        public int altitude;
+        public Point Start { get; set; }
+        public Point End { get; set; }
+    }
 
-        public Coordinate(string name, double  latitude, double longitude, int altitude)
+    public class Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
+
+    public class Sector
+    {
+        public List<Point> Points { get; set; }
+    }
+
+    public class Waypoint
+    {
+        public string name { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+        public int altitude { get; set; }
+
+        public Waypoint(string name, double  latitude, double longitude, int altitude)
         {
             this.name = name;
             this.latitude = latitude;
@@ -31,8 +48,8 @@ namespace eStrips
 
     internal struct Segment
     {
-        public Coordinate C1 { get; set; }
-        public Coordinate C2 { get; set; }
+        public Waypoint W1 { get; set; }
+        public Waypoint W2 { get; set; }
     }
 
     internal struct Flight
@@ -43,7 +60,7 @@ namespace eStrips
         public int Track { get; set; }
         public int Altitude { get; set; }
         public int Speed { get; set; }
-        public Coordinate Position { get; set; }
+        public Waypoint Position { get; set; }
         public string ASSR { get; set; }
         public string PSSR { get; set; }
         public string WptLbl { get; set; }
@@ -51,9 +68,12 @@ namespace eStrips
         public string SpdLbl { get; set; }
         public Flightplan Flightplan { get; set; }
         public double ComputedCFL { get; set; }
+        public int AppliedEFL { get; set; }
         public int AppliedXFL { get; set; }
         public string PrevSector { get; set; }
         public string NextSector { get; set; }
+        public List<Line> Route { get; set; }
+        public List<Line> FRF { get; set; }
 
         // Functions
         public override string ToString()
@@ -66,10 +86,18 @@ namespace eStrips
         {
 
             if (int.TryParse(AltLbl, out int _)) { ComputedCFL = int.Parse(AltLbl); }
+            else if (WptLbl.Substring(0, 3) == "ILS" || AltLbl == "LND") { ComputedCFL = 0; }
             else { ComputedCFL = Flightplan.CruiseAlt; }
 
-            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{Flightplan.CruiseAlt.ToString().PadLeft(3, '0').Substring(0, 3)}", 
-                                    $"VEK             SAB", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{/*PrevSector*/Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
+            /*if (AppliedEFL == 0) { ComputedCFL = AppliedEFL; }*/
+            if (AppliedXFL == 0)
+            {
+                AppliedXFL = Flightplan.CruiseAlt;
+                Console.WriteLine(Callsign + " AppliedXFL: " + AppliedXFL);
+            }
+
+            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
+                                    $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{/*PrevSector*/Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
                                     $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }
     }

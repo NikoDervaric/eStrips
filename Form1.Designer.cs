@@ -49,6 +49,7 @@
             // stripDataTable
             // 
             this.stripDataTable.AllowUserToAddRows = false;
+            this.stripDataTable.AllowUserToDeleteRows = false;
             this.stripDataTable.BackgroundColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.stripDataTable.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.stripDataTable.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Raised;
