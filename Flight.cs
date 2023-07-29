@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Shapes;
 
 namespace eStrips
@@ -12,12 +13,34 @@ namespace eStrips
     {
         public Point Start { get; set; }
         public Point End { get; set; }
+
+        public Line(Point start, Point end)
+        {
+            Start = start;
+            End = end;
+        }
+
+        public override string ToString()
+        {
+            return $"{Start} ->- {End}";
+        }
     }
 
     public class Point
     {
         public double X { get; set; }
         public double Y { get; set; }
+
+        public Point(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public override string ToString()
+        {
+            return $"({X}, {Y})";
+        }
     }
 
     public class Sector
@@ -89,11 +112,9 @@ namespace eStrips
             else if (WptLbl.Substring(0, 3) == "ILS" || AltLbl == "LND") { ComputedCFL = 0; }
             else { ComputedCFL = Flightplan.CruiseAlt; }
 
-            /*if (AppliedEFL == 0) { ComputedCFL = AppliedEFL; }*/
             if (AppliedXFL == 0)
             {
                 AppliedXFL = Flightplan.CruiseAlt;
-                Console.WriteLine(Callsign + " AppliedXFL: " + AppliedXFL);
             }
 
             return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 

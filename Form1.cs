@@ -176,12 +176,13 @@ namespace eStrips
                 if (parts.Length == 3)
                 {
                     string name = parts[0];
-                    double latitude;
-                    double longitude;
+                    double latitude = 0.0;
+                    double longitude = 0.0;
 
                     if (double.TryParse(parts[1], out latitude) && double.TryParse(parts[2], out longitude))
                     {
-                        Point point = new Point { X = latitude, Y = longitude };
+                        //Log(latitude + " | " + longitude);
+                        Point point = new Point ( Math.Round(latitude, 5), Math.Round(longitude, 5));
                         dictionary[name] = point;
                     }
                     else
@@ -206,10 +207,10 @@ namespace eStrips
 
             foreach (var line in lines)
             {
-                var coordinates = line.Split(',');
-                if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double latitude) && double.TryParse(coordinates[1], out double longitude))
+                var coordinates = line.Split(';');
+                if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double _) && double.TryParse(coordinates[1], out double _))
                 {
-                    sector.Points.Add(new Point { X = latitude, Y = longitude });
+                    sector.Points.Add(new Point ( Math.Round(Convert.ToDouble(coordinates[0]), 5), Math.Round(Convert.ToDouble(coordinates[1]), 5) ));
                 }
                 else
                 {
@@ -220,157 +221,6 @@ namespace eStrips
             return sector;
         }
 
-        /*public static bool HasIntersection(List<Line> lines, Sector sector)
-        {
-            foreach (var line in lines)
-            {
-                if (IntersectsSector(line, sector))
-                {
-                    //Log($"{line.Start.X};{line.Start.Y} | {line.End.X};{line.End.Y}");
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IntersectsSector(Line line, Sector sector)
-        {
-            foreach (var SectorLine in GetSectorLines(sector))
-            {
-                if (Intersects(line, SectorLine))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private static List<Line> GetSectorLines(Sector sector)
-        {
-            var lines = new List<Line>();
-            var count = sector.Points.Count;
-
-            for (int i = 0; i < count; i++)
-            {
-                var startPoint = sector.Points[i];
-                var endPoint = sector.Points[(i + 1) % count];
-
-                lines.Add(new Line { Start = startPoint, End = endPoint });
-            }
-
-            return lines;
-        }
-
-        private static bool Intersects(Line line1, Line line2, double tolerance = 0.001)
-        {
-            //  Returns Point of intersection if do intersect otherwise default Point (null)
-            double x1 = line1.Start.X, y1 = line1.Start.Y;
-            double x2 = line1.End.X, y2 = line1.End.Y;
-
-            double x3 = line2.Start.X, y3 = line2.Start.Y;
-            double x4 = line2.End.X, y4 = line2.End.Y;
-
-            // equations of the form x=c (two vertical lines) with overlapping
-            if (Math.Abs(x1 - x2) < tolerance && Math.Abs(x3 - x4) < tolerance && Math.Abs(x1 - x3) < tolerance)
-            {
-                return true;
-            }
-
-            //equations of the form y=c (two horizontal lines) with overlapping
-            if (Math.Abs(y1 - y2) < tolerance && Math.Abs(y3 - y4) < tolerance && Math.Abs(y1 - y3) < tolerance)
-            {
-                return true;
-            }
-
-            //equations of the form x=c (two vertical parallel lines)
-            if (Math.Abs(x1 - x2) < tolerance && Math.Abs(x3 - x4) < tolerance)
-            {
-                //return default (no intersection)
-                return false;
-            }
-
-            //equations of the form y=c (two horizontal parallel lines)
-            if (Math.Abs(y1 - y2) < tolerance && Math.Abs(y3 - y4) < tolerance)
-            {
-                //return default (no intersection)
-                return false;
-            }
-
-            //general equation of line is y = mx + c where m is the slope
-            //assume equation of line 1 as y1 = m1x1 + c1 
-            //=> -m1x1 + y1 = c1 ----(1)
-            //assume equation of line 2 as y2 = m2x2 + c2
-            //=> -m2x2 + y2 = c2 -----(2)
-            //if line 1 and 2 intersect then x1=x2=x & y1=y2=y where (x,y) is the intersection point
-            //so we will get below two equations 
-            //-m1x + y = c1 --------(3)
-            //-m2x + y = c2 --------(4)
-
-            double x, y;
-
-            //lineA is vertical x1 = x2
-            //slope will be infinity
-            //so lets derive another solution
-            if (Math.Abs(x1 - x2) < tolerance)
-            {
-                //compute slope of line 2 (m2) and c2
-                double m2 = (y4 - y3) / (x4 - x3);
-                double c2 = -m2 * x3 + y3;
-
-                //equation of vertical line is x = c
-                //if line 1 and 2 intersect then x1=c1=x
-                //subsitute x=x1 in (4) => -m2x1 + y = c2
-                // => y = c2 + m2x1 
-                return true;
-            }
-            //lineB is vertical x3 = x4
-            //slope will be infinity
-            //so lets derive another solution
-            else if (Math.Abs(x3 - x4) < tolerance)
-            {
-                //compute slope of line 1 (m1) and c2
-                double m1 = (y2 - y1) / (x2 - x1);
-                double c1 = -m1 * x1 + y1;
-
-                //equation of vertical line is x = c
-                //if line 1 and 2 intersect then x3=c3=x
-                //subsitute x=x3 in (3) => -m1x3 + y = c1
-                // => y = c1 + m1x3 
-                return true;
-            }
-            //lineA & lineB are not vertical 
-            //(could be horizontal we can handle it with slope = 0)
-            else
-            {
-                //compute slope of line 1 (m1) and c2
-                double m1 = (y2 - y1) / (x2 - x1);
-                double c1 = -m1 * x1 + y1;
-
-                //compute slope of line 2 (m2) and c2
-                double m2 = (y4 - y3) / (x4 - x3);
-                double c2 = -m2 * x3 + y3;
-
-                //solving equations (3) & (4) => x = (c1-c2)/(m2-m1)
-                //plugging x value in equation (4) => y = c2 + m2 * x
-                x = (c1 - c2) / (m2 - m1);
-                y = c2 + m2 * x;
-
-                //verify by plugging intersection point (x, y)
-                //in orginal equations (1) & (2) to see if they intersect
-                //otherwise x,y values will not be finite and will fail this check
-                if (!(Math.Abs(-m1 * x + y - c1) < tolerance
-                    && Math.Abs(-m2 * x + y - c2) < tolerance))
-                {
-                    //return default (no intersection)
-                    return false;
-                }
-            }
-
-            //return default (no intersection)
-            return false;
-        }
-        */
-        
         private void LoadLoAs()
         {
             string[] lines = File.ReadAllLines(@"..\..\loa.txt");
@@ -389,7 +239,107 @@ namespace eStrips
                 {
                     Departures.Add(key, loaFL);
                 }
+                else { continue; }
             }
+        }
+
+        public static void CheckIntersections(List<Line> lines, Sector sector)
+        {
+            foreach (Line line in lines)
+            {
+                if (IntersectsSector(line, sector))
+                {
+                    Console.WriteLine(line + " intersects sector.");
+                }
+            }
+        }
+
+        // IntersectsSector checks if line intersects sector
+        public static bool IntersectsSector(Line line, Sector sector)
+        {
+            // individually check if line intersects any sector lines
+            for (int i = 0; i < sector.Points.Count; i++)
+            {
+                Point start = sector.Points[i];
+                Point end = sector.Points[(i + 1) % sector.Points.Count];
+
+                if (LinesIntersect(line, new Line( start, end )))
+                {
+                    // if line intersects any of the sector lines that means it
+                    // also intersects the sector
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool LinesIntersect(Line l1, Line l2)
+        {
+            Point p1 = l1.Start; Point q1 = l1.End; // line 1
+            Point p2 = l2.Start; Point q2 = l2.End; // line 2
+
+            // Find the four orientations
+            int o1 = Orientation(p1, q1, p2);
+            int o2 = Orientation(p1, q1, q2);
+            int o3 = Orientation(p2, q2, p1);
+            int o4 = Orientation(p2, q2, q1);
+
+            if (o1 != o2 && o3 != o4)
+            {
+                // TODO: check if line only intersects with point from sector
+                Console.WriteLine("Line intersects sector.");
+                return true;
+            }
+
+            // Special cases for colinear points
+            if (o1 == 0 && OnSegment(p1, p2, q1))
+            {
+                Console.WriteLine("Parallel intersection.");
+                return true;
+            }
+
+            if (o2 == 0 && OnSegment(p1, q2, q1))
+            {
+                Console.WriteLine("Parallel intersection.");
+                return true;
+            }
+
+            if (o1 == 0 && OnSegment(p2, p1, q2))
+            {
+                Console.WriteLine("Parallel intersection.");
+                return true;
+            }
+
+            if (o1 == 0 && OnSegment(p2, q1, q2))
+            {
+                Console.WriteLine("Parallel intersection.");
+                return true;
+            }
+
+            //Console.WriteLine("NO intersection between lines");
+            return false;
+        }
+
+        // Checks if point q lies on line segment 'pr'
+        private static bool OnSegment(Point p, Point q, Point r)
+        {
+            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) && q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y))
+                return true;
+
+            return false;
+        }
+
+        // 0  --> p, q and r are colinear
+        // 1  --> Clockwise
+        // -1 --> Counterclockwise
+        private static int Orientation(Point p, Point q, Point r)
+        {
+            double val = (q.Y - p.Y) * (r.X - q.X) - (q.X - p.X) * (r.Y - q.Y);
+
+            if (val == 0.0) return 0; // colinear
+
+            return (val > 0) ? 1 : 2;
         }
 
         public static string SendCommand(string command)
@@ -504,19 +454,23 @@ namespace eStrips
                         },
                         AppliedXFL = 0
                     };
+                    
                     Log(flight.Callsign);
                     flight.Route = ProcessRoute(flight);
-                    flight.AppliedXFL = ApplyLoA(flight);
-                    Log(flight.AppliedXFL.ToString());
-
-                    validFlights.Add(flight);
-
-                    /*if (HasIntersection(flight.Route, mainSector)) 
+                    //flight.AppliedXFL = ApplyLoA(flight);
+                    //validFlights.Add(flight);
+                    
+                    foreach (Line line in flight.Route)
                     {
-                        Log(flight.Callsign + " has intersection");
-                        validFlights.Add(flight);
+                        if (IntersectsSector(line, mainSector))
+                        {
+                            Log(flight.Callsign + " has intersection");
+                            flight.AppliedXFL = ApplyLoA(flight);
+                            validFlights.Add(flight);
+                            break;
+                        }
+                        else { continue; }
                     }
-                    else { continue; }*/
                 }
                 else { continue; }
             }
@@ -550,7 +504,7 @@ namespace eStrips
                 Point point1 = tmp_route[i];
                 Point point2 = tmp_route[(i + 1) % count];
 
-                route_segments.Add(new Line { Start = point1, End = point2 });
+                route_segments.Add(new Line (point1, point2));
             }
 
             return route_segments;
@@ -576,10 +530,10 @@ namespace eStrips
                     Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
                     return Arrivals[arrKey];
                 }
-                else
+                /*else
                 {
                     return flight.Flightplan.CruiseAlt;
-                }
+                }*/
             }
             return 0;
         }
