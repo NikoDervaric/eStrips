@@ -14,7 +14,6 @@ using System.Timers;
 using System.Threading;
 using System.Security.Permissions;
 using System.Runtime.CompilerServices;
-using System.Windows.Shapes;
 using static System.Windows.Forms.LinkLabel;
 using System.Collections;
 using System.Xml.Linq;
@@ -243,6 +242,8 @@ namespace eStrips
             }
         }
 
+
+        // CheckIntersections checks which lines intersects the sector
         public static void CheckIntersections(List<Line> lines, Sector sector)
         {
             foreach (Line line in lines)
@@ -254,6 +255,11 @@ namespace eStrips
             }
         }
 
+        // The explanation of the algorithm for line intersection is available at these links:
+        // https://www.youtube.com/watch?v=bbTqI0oqL5U
+        // https://gist.github.com/SuryaPratapK/4b632447abbc0e95f6e81da321b855fb
+        // https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+
         // IntersectsSector checks if line intersects sector
         public static bool IntersectsSector(Line line, Sector sector)
         {
@@ -263,7 +269,7 @@ namespace eStrips
                 Point start = sector.Points[i];
                 Point end = sector.Points[(i + 1) % sector.Points.Count];
 
-                if (LinesIntersect(line, new Line( start, end )))
+                if (LinesIntersect(line, new Line( start, end)))
                 {
                     // if line intersects any of the sector lines that means it
                     // also intersects the sector
@@ -274,6 +280,7 @@ namespace eStrips
             return false;
         }
 
+        // LinesIntersect check if line l1 intersects line l2
         private static bool LinesIntersect(Line l1, Line l2)
         {
             Point p1 = l1.Start; Point q1 = l1.End; // line 1
@@ -317,27 +324,30 @@ namespace eStrips
                 return true;
             }
 
-            //Console.WriteLine("NO intersection between lines");
             return false;
         }
 
         // Checks if point q lies on line segment 'pr'
         private static bool OnSegment(Point p, Point q, Point r)
         {
-            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) && q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y))
+            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) &&
+                q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y))
                 return true;
 
             return false;
         }
 
-        // 0  --> p, q and r are colinear
-        // 1  --> Clockwise
-        // -1 --> Counterclockwise
+        // 0 --> p, q and r are colinear
+        // 1 --> Clockwise
+        // 2 --> Counterclockwise
         private static int Orientation(Point p, Point q, Point r)
         {
             double val = (q.Y - p.Y) * (r.X - q.X) - (q.X - p.X) * (r.Y - q.Y);
 
-            if (val == 0.0) return 0; // colinear
+            // val == 0 should be good if the numbers were integers
+            // Because we are using decimal number, we leave some room beacause
+            // decimal numbers can be inaccurately stored in memory
+            if (Math.Abs(val) < 0.0001) return 0; // colinear
 
             return (val > 0) ? 1 : 2;
         }
