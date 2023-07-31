@@ -491,20 +491,19 @@ namespace eStrips
                     Point point = Airac[parts[0]];
                     tmp_route.Add(point);
                 }
-                /*else
+                else
                 {
-                    Console.WriteLine($"Name '{wpt}' not found in the dictionary.");
-                }*/
+                    //Console.WriteLine($"Name '{wpt}' not found in the dictionary.");
+                    continue;
+                }
             }
 
-            var count = tmp_route.Count;
-
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < tmp_route.Count - 1; i++)
             {
                 Point point1 = tmp_route[i];
-                Point point2 = tmp_route[(i + 1) % count];
+                Point point2 = tmp_route[(i + 1) % tmp_route.Count];
 
-                route_segments.Add(new Line (point1, point2));
+                route_segments.Add(new Line(point1, point2));
             }
 
             return route_segments;
