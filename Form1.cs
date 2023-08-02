@@ -31,24 +31,25 @@ namespace eStrips
         private List<Flight> validFlights = new List<Flight>();
         private readonly Dictionary<string, Point> Airac;
         private readonly Sector mainSector;
+        private readonly List<Sector> sectors = new List<Sector>();
 
         //LoAs
         //WRITE THE LOASSS
         // Dictionary<FIX, Dictionary<AIRPORT, WAYPOINT(LAT, LON, LEVEL)>>
         private readonly Dictionary<string, int> Departures = new Dictionary<string, int>();
         private readonly Dictionary<string, int> Arrivals = new Dictionary<string, int>();
-        //private readonly Dictionary<string, int> Overflights;
+        private readonly Dictionary<string, int> Overflights = new Dictionary<string, int>();
 
         public eStrips()
         {
             InitializeComponent();
 
             mainSector = LoadMainSector();
-            Log("Loaded sector.");
             Airac = LoadAirac();
             Log("Loaded AIRAC.");
             LoadLoAs();
             Log("Loaded LOAs.");
+            sectors = LoadSectors();
 
             StyleStripTable();
 
@@ -200,8 +201,8 @@ namespace eStrips
 
         public Sector LoadMainSector()
         {
-            string filePath = "../../sectors/LJLA.msct";
-            var lines = File.ReadAllLines(filePath);
+            string[] filePath = Directory.GetFiles($"../../sectors", "*.msct");
+            var lines = File.ReadAllLines(filePath[0]);
             var sector = new Sector { Points = new List<Point>() };
 
             foreach (var line in lines)
@@ -216,8 +217,40 @@ namespace eStrips
                     throw new FormatException("Invalid coordinate format in file.");
                 }
             }
-
+            Log($"Loaded {filePath[0]}");
             return sector;
+        }
+
+        public List<Sector> LoadSectors()
+        {
+            string[] filePath = Directory.GetFiles($"../../sectors", "*.sct");
+            List<Sector> sectors = new List<Sector>();
+
+            foreach (string sectorName in filePath)
+            {
+                var lines = File.ReadAllLines(sectorName);
+                string fileName = Path.GetFileNameWithoutExtension(sectorName);
+                Sector newSect = new Sector { Name = fileName, Points = new List<Point>() };
+
+                foreach (var line in lines)
+                {
+                    newSect.Name = fileName;
+                    var coordinates = line.Split(';');
+                    if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double _) && double.TryParse(coordinates[1], out double _))
+                    {
+                        newSect.Points.Add(new Point(Math.Round(Convert.ToDouble(coordinates[0]), 5), Math.Round(Convert.ToDouble(coordinates[1]), 5)));
+                    }
+                    else
+                    {
+                        throw new FormatException("Invalid coordinate format in file.");
+                    }
+                }
+
+                sectors.Add(newSect);
+                Log($"Loaded {sectorName}");
+            }
+
+            return sectors;
         }
 
         private void LoadLoAs()
@@ -241,7 +274,6 @@ namespace eStrips
                 else { continue; }
             }
         }
-
 
         // CheckIntersections checks which lines intersects the sector
         public static void CheckIntersections(List<Line> lines, Sector sector)
@@ -465,7 +497,6 @@ namespace eStrips
                         AppliedXFL = 0
                     };
                     
-                    Log(flight.Callsign);
                     flight.Route = ProcessRoute(flight);
                     //flight.AppliedXFL = ApplyLoA(flight);
                     //validFlights.Add(flight);
@@ -539,10 +570,15 @@ namespace eStrips
                     Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
                     return Arrivals[arrKey];
                 }
-                /*else
+                else if (Overflights.ContainsKey(arrKey))
+                {
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
+                    return Arrivals[arrKey];
+                }
+                else
                 {
                     return flight.Flightplan.CruiseAlt;
-                }*/
+                }
             }
             return 0;
         }

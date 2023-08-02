@@ -43,6 +43,7 @@ namespace eStrips
 
     public class Sector
     {
+        public string Name { get; set; }
         public List<Point> Points { get; set; }
     }
 
