@@ -92,8 +92,8 @@ namespace eStrips
         public double ComputedCFL { get; set; }
         public int AppliedEFL { get; set; }
         public int AppliedXFL { get; set; }
-        public string PrevSector { get; set; }
-        public string NextSector { get; set; }
+        public string InboundSector { get; set; }
+        public string OutboundSector { get; set; }
         public List<Line> Route { get; set; }
         public List<Line> FRF { get; set; }
 
@@ -114,9 +114,10 @@ namespace eStrips
             if (AppliedXFL == 0)
             {
                 AppliedXFL = Flightplan.CruiseAlt;
+                AppliedEFL = Flightplan.CruiseAlt;
             }
 
-            return new string[] { $"{Callsign}", $"{ComputedCFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
+            return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
                                     $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{/*PrevSector*/Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
                                     $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }

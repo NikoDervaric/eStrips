@@ -23,9 +23,11 @@ namespace eStrips
 {
     public partial class eStrips : Form
     {
+        private static string[] portFile = File.ReadAllLines(@"..\..\.key");
+
         private System.Timers.Timer timer;
         private const string serverAddress = "127.0.0.1";       // Replace with your server IP address
-        private const int serverPort = 1130;                    // Replace with your server port number
+        private static int serverPort = int.Parse(portFile[0]);                    // Replace with your server port number
         private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
 
         private List<Flight> validFlights = new List<Flight>();
@@ -36,8 +38,8 @@ namespace eStrips
         //LoAs
         //WRITE THE LOASSS
         // Dictionary<FIX, Dictionary<AIRPORT, WAYPOINT(LAT, LON, LEVEL)>>
-        private readonly Dictionary<string, int> Departures = new Dictionary<string, int>();
-        private readonly Dictionary<string, int> Arrivals = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> EntryLevels = new Dictionary<string, int>();
+        private readonly Dictionary<string, int> ExitLevels = new Dictionary<string, int>();
         private readonly Dictionary<string, int> Overflights = new Dictionary<string, int>();
 
         public eStrips()
@@ -46,9 +48,9 @@ namespace eStrips
 
             mainSector = LoadMainSector();
             Airac = LoadAirac();
-            Log("Loaded AIRAC.");
+            Log("Loaded AIRAC");
             LoadLoAs();
-            Log("Loaded LOAs.");
+            Log("Loaded LoAs");
             sectors = LoadSectors();
 
             StyleStripTable();
@@ -171,6 +173,8 @@ namespace eStrips
 
             foreach (var line in lines)
             {
+                if (line.Substring(0, 2) == "//") { continue; }
+
                 string[] parts = line.Split(';');
 
                 if (parts.Length == 3)
@@ -207,6 +211,8 @@ namespace eStrips
 
             foreach (var line in lines)
             {
+                if (line.Substring(0, 2) == "//") { continue; }
+
                 var coordinates = line.Split(';');
                 if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double _) && double.TryParse(coordinates[1], out double _))
                 {
@@ -234,6 +240,7 @@ namespace eStrips
 
                 foreach (var line in lines)
                 {
+                    if (line.Substring(0, 2) == "//") { continue; }
                     newSect.Name = fileName;
                     var coordinates = line.Split(';');
                     if (coordinates.Length == 2 && double.TryParse(coordinates[0], out double _) && double.TryParse(coordinates[1], out double _))
@@ -247,7 +254,7 @@ namespace eStrips
                 }
 
                 sectors.Add(newSect);
-                Log($"Loaded {sectorName}");
+                Log($"Loaded sector: {fileName}");
             }
 
             return sectors;
@@ -259,17 +266,20 @@ namespace eStrips
 
             foreach (string line in lines)
             {
+                if (line.Substring(0, 2) == "//") { continue; }
                 string[] parts = line.Split(',');
-                string key = parts[1] + parts[2];
-                int loaFL = int.Parse(parts[3]);
+                string key = parts[1] + parts[2] + parts[3];
+                int loaFL = int.Parse(parts[4]);
 
-                if (parts[0] == "A")
+                if (parts[0] == "XFL")
                 {
-                    Arrivals.Add(key, loaFL);
+                    ExitLevels.Add(key, loaFL);
+                    Log($"Loaded: {key}");
                 }
-                else if (parts[0] == "D")
+                else if (parts[0] == "EFL")
                 {
-                    Departures.Add(key, loaFL);
+                    EntryLevels.Add(key, loaFL);
+                    Log($"Loaded: {key}");
                 }
                 else { continue; }
             }
@@ -327,7 +337,7 @@ namespace eStrips
             if (o1 != o2 && o3 != o4)
             {
                 // TODO: check if line only intersects with point from sector
-                Console.WriteLine("Line intersects sector.");
+                //Console.WriteLine("Line intersects sector.");
                 return true;
             }
 
@@ -498,15 +508,30 @@ namespace eStrips
                     };
                     
                     flight.Route = ProcessRoute(flight);
-                    //flight.AppliedXFL = ApplyLoA(flight);
-                    //validFlights.Add(flight);
                     
                     foreach (Line line in flight.Route)
                     {
                         if (IntersectsSector(line, mainSector))
                         {
                             Log(flight.Callsign + " has intersection");
-                            flight.AppliedXFL = ApplyLoA(flight);
+                            
+                            /*foreach(Line seg in flight.Route)
+                            {
+                                foreach(Sector sect in sectors)
+                                {
+                                    if (IntersectsSector(seg, sect))
+                                    {
+                                        flight.InboundSector = sect.Name;
+                                        Log("Inbound sector: " + flight.InboundSector);
+                                        break;
+                                    }
+                                }
+                                break;
+                            }*/
+
+                            flight.AppliedEFL = ApplyEFLLoA(flight);
+                            Log($"LOA EFL: {flight.AppliedEFL}");
+                            //flight.AppliedXFL = ApplyXFLLoA(flight);
                             validFlights.Add(flight);
                             break;
                         }
@@ -534,7 +559,7 @@ namespace eStrips
                 }
                 else
                 {
-                    //Console.WriteLine($"Name '{wpt}' not found in the dictionary.");
+                    //Log($"Name '{wpt}' not found in the dictionary.");
                     continue;
                 }
             }
@@ -550,31 +575,59 @@ namespace eStrips
             return route_segments;
         }
 
-        private int ApplyLoA(Flight flight)
+        private int ApplyEFLLoA(Flight flight)
         {
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
+            string FixInboundSect = flight.InboundSector;
+
+            string EFLKey1 = ADEP + FixInboundSect;
+            string EFLKey2 = ADES + FixInboundSect;
+
+            Log(EFLKey1);
+            Log(EFLKey2);
+
+            if (EntryLevels.ContainsKey(EFLKey1))
+            {
+                Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " EFL Key: " + EFLKey1);
+                return EntryLevels[EFLKey1];
+            }
+            else if (EntryLevels.ContainsKey(EFLKey2))
+            {
+                Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADES + " EFL Key: " + EFLKey2);
+                return EntryLevels[EFLKey2];
+            }
+
+
+            return 0;
+        }
+
+        private int ApplyXFLLoA(Flight flight)
+        {
+            string ADEP = flight.Flightplan.Adep;
+            string ADES = flight.Flightplan.Ades;
+            string FixOutboundSect = flight.OutboundSector;
 
             foreach (string wpt in flight.Flightplan.Route)
             {
-                string depKey = wpt + ADEP;
+                string EFLKey = wpt + ADEP;
                 string arrKey = wpt + ADES;
 
-                if (Departures.ContainsKey(depKey))
+                if (EntryLevels.ContainsKey(EFLKey))
                 {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " WPT: " + wpt);
-                    return Departures[depKey];
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " WPT/Sect: " + wpt);
+                    return EntryLevels[EFLKey];
                 }
-                else if (Arrivals.ContainsKey(arrKey))
+                else if (ExitLevels.ContainsKey(arrKey))
                 {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
-                    return Arrivals[arrKey];
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + ExitLevels[arrKey]);
+                    return ExitLevels[arrKey];
                 }
-                else if (Overflights.ContainsKey(arrKey))
+                /*else if (Overflights.ContainsKey(arrKey))
                 {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + Arrivals[arrKey]);
-                    return Arrivals[arrKey];
-                }
+                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + ExitLevels[arrKey]);
+                    return ExitLevels[arrKey];
+                }*/
                 else
                 {
                     return flight.Flightplan.CruiseAlt;
@@ -600,6 +653,21 @@ namespace eStrips
             ValidateFlights(response);
             PopulateDataGridView(validFlights);
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
+        }
+
+        private void BtnMeteo_MouseClick(object sender, MouseEventArgs e)
+        {
+            System.Diagnostics.Process.Start($"https://meteo.arso.gov.si/met/sl/weather/observ/radar/#rad_faq");
+        }
+
+        private void BtnLoa_MouseClick(object sender, MouseEventArgs e)
+        {
+            System.Diagnostics.Process.Start($"https://si.ivao.aero/wp-content/uploads/2023/08/IVAO_SI_FLAS_1.0.pdf");
+        }
+
+        private void BtnCharts_MouseClick(object sender, MouseEventArgs e)
+        {
+            System.Diagnostics.Process.Start($"https://www.sloveniacontrol.si/acrobat/aip/Operations/history-en-GB.html");
         }
     }
 }
