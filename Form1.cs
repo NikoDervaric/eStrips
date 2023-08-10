@@ -449,6 +449,55 @@ namespace eStrips
         }
 
         //FLIGHT FILTERING AND PROCESSING
+        private string ApplyOutboundSector(Flight flight)
+        {
+            string outboundSector = "";
+
+            foreach(var segment in flight.Route)
+            {
+                foreach(Sector sect in sectors)
+                {
+                    if (IntersectsSector(segment, sect))
+                    {
+                        outboundSector = sect.Name;
+                        return outboundSector;
+                    }
+                }
+            }
+
+            return outboundSector;
+        }
+
+        private string ApplyInboundSector(Flight flight)
+        {
+            List<string> sectorList = new List<string>();
+
+            foreach (var segment in flight.Route)
+            {
+                foreach (Sector sect in sectors)
+                {
+                    if (IntersectsSector(segment, sect))
+                    {
+                        sectorList.Add(sect.Name);
+                    }
+                }
+            }
+
+            for (int i = 0; i < sectorList.Count; i++)
+            {
+               if (sectorList[i] == sectorList[i + 1])
+               {
+                    continue;
+               }
+               else
+               {
+                    return sectorList[i+1];
+               }
+            }
+
+            return sectorList[2];
+        }
+
         private void ValidateFlights(string radarResponse)
         {
             validFlights.Clear();
@@ -514,24 +563,16 @@ namespace eStrips
                         if (IntersectsSector(line, mainSector))
                         {
                             Log(flight.Callsign + " has intersection");
-                            
-                            /*foreach(Line seg in flight.Route)
-                            {
-                                foreach(Sector sect in sectors)
-                                {
-                                    if (IntersectsSector(seg, sect))
-                                    {
-                                        flight.InboundSector = sect.Name;
-                                        Log("Inbound sector: " + flight.InboundSector);
-                                        break;
-                                    }
-                                }
-                                break;
-                            }*/
 
-                            flight.AppliedEFL = ApplyEFLLoA(flight);
-                            Log($"LOA EFL: {flight.AppliedEFL}");
-                            //flight.AppliedXFL = ApplyXFLLoA(flight);
+                            flight.OutboundSector = ApplyOutboundSector(flight);
+                            flight.InboundSector = ApplyInboundSector(flight);
+                            Log($"Outbound: {flight.OutboundSector}");
+                            Log($"Inbound: {flight.InboundSector}");
+
+                            //flight.AppliedEFL = ApplyEFLLoA(flight);
+                            //Log($"LOA EFL: {flight.AppliedEFL}");
+                            flight.AppliedXFL = ApplyXFLLoA(flight);
+                            Log($"LOA XFL: {flight.AppliedXFL}");
                             validFlights.Add(flight);
                             break;
                         }
@@ -584,8 +625,8 @@ namespace eStrips
             string EFLKey1 = ADEP + FixInboundSect;
             string EFLKey2 = ADES + FixInboundSect;
 
-            Log(EFLKey1);
-            Log(EFLKey2);
+            //Log(EFLKey1);
+            //Log(EFLKey2);
 
             if (EntryLevels.ContainsKey(EFLKey1))
             {
@@ -662,7 +703,7 @@ namespace eStrips
 
         private void BtnLoa_MouseClick(object sender, MouseEventArgs e)
         {
-            System.Diagnostics.Process.Start($"https://si.ivao.aero/wp-content/uploads/2023/08/IVAO_SI_FLAS_1.0.pdf");
+            System.Diagnostics.Process.Start($"https://si.ivao.aero/wp-content/uploads/2023/08/IVAO-FLAS.pdf");
         }
 
         private void BtnCharts_MouseClick(object sender, MouseEventArgs e)
