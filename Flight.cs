@@ -106,7 +106,6 @@ namespace eStrips
 
         public string[] ShowFlight()
         {
-
             if (int.TryParse(AltLbl, out int _)) { ComputedCFL = int.Parse(AltLbl); }
             else if (WptLbl.Substring(0, 3) == "ILS" || AltLbl == "LND") { ComputedCFL = 0; }
             else { ComputedCFL = Flightplan.CruiseAlt; }
@@ -115,13 +114,12 @@ namespace eStrips
             {
                 AppliedXFL = Flightplan.CruiseAlt;
             }
-            if (AppliedEFL == 0)
-            {
-                AppliedEFL = Flightplan.CruiseAlt;
-            }
+            
+            if (int.TryParse(AltLbl, out int CFL) && CFL < Flightplan.CruiseAlt) { AppliedEFL = CFL; }
+            else { AppliedEFL = CFL; }
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
-                                    $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{/*PrevSector*/Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
+                                    $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
                                     $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }
     }

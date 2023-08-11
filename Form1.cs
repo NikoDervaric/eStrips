@@ -627,7 +627,6 @@ namespace eStrips
             string DKey_ADEP = 'D' + ADEP + flight.OutboundSector;
             string AKey_ADES = 'A' + ADES + flight.OutboundSector;
 
-
             /*if (EntryLevels.ContainsKey(EFLKey1))
             {
                 Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " EFL Key: " + EFLKey1);
