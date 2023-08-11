@@ -483,8 +483,11 @@ namespace eStrips
                 }
             }
 
+            if (sectorList.Count == 1) { return sectorList[0]; }
+
             for (int i = 0; i < sectorList.Count; i++)
             {
+
                if (sectorList[i] == sectorList[i + 1])
                {
                     continue;
@@ -566,11 +569,11 @@ namespace eStrips
 
                             flight.OutboundSector = ApplyOutboundSector(flight);
                             flight.InboundSector = ApplyInboundSector(flight);
-                            Log($"Outbound: {flight.OutboundSector}");
-                            Log($"Inbound: {flight.InboundSector}");
+                            Log("O: " + flight.OutboundSector + " | I: " + flight.InboundSector);
 
                             //flight.AppliedEFL = ApplyEFLLoA(flight);
                             //Log($"LOA EFL: {flight.AppliedEFL}");
+
                             flight.AppliedXFL = ApplyXFLLoA(flight);
                             Log($"LOA XFL: {flight.AppliedXFL}");
                             validFlights.Add(flight);
@@ -620,15 +623,12 @@ namespace eStrips
         {
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
-            string FixInboundSect = flight.InboundSector;
 
-            string EFLKey1 = ADEP + FixInboundSect;
-            string EFLKey2 = ADES + FixInboundSect;
+            string DKey_ADEP = 'D' + ADEP + flight.OutboundSector;
+            string AKey_ADES = 'A' + ADES + flight.OutboundSector;
 
-            //Log(EFLKey1);
-            //Log(EFLKey2);
 
-            if (EntryLevels.ContainsKey(EFLKey1))
+            /*if (EntryLevels.ContainsKey(EFLKey1))
             {
                 Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " EFL Key: " + EFLKey1);
                 return EntryLevels[EFLKey1];
@@ -637,8 +637,7 @@ namespace eStrips
             {
                 Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADES + " EFL Key: " + EFLKey2);
                 return EntryLevels[EFLKey2];
-            }
-
+            }*/
 
             return 0;
         }
@@ -647,34 +646,27 @@ namespace eStrips
         {
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
-            string FixOutboundSect = flight.OutboundSector;
 
-            foreach (string wpt in flight.Flightplan.Route)
+            string DKey_ADEP = 'D' + ADEP + flight.InboundSector;
+            string AKey_ADES = 'A' + ADES + flight.InboundSector;
+
+            int XFL = 0;
+
+            if (ExitLevels.ContainsKey(DKey_ADEP)) 
             {
-                string EFLKey = wpt + ADEP;
-                string arrKey = wpt + ADES;
-
-                if (EntryLevels.ContainsKey(EFLKey))
-                {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " WPT/Sect: " + wpt);
-                    return EntryLevels[EFLKey];
-                }
-                else if (ExitLevels.ContainsKey(arrKey))
-                {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + ExitLevels[arrKey]);
-                    return ExitLevels[arrKey];
-                }
-                /*else if (Overflights.ContainsKey(arrKey))
-                {
-                    Log("LOA APPLIED to C/S: " + flight.Callsign + " ARR: " + ADES + " WPT: " + wpt + " FL: " + ExitLevels[arrKey]);
-                    return ExitLevels[arrKey];
-                }*/
-                else
-                {
-                    return flight.Flightplan.CruiseAlt;
-                }
+                XFL = ExitLevels[DKey_ADEP];
             }
-            return 0;
+
+            if(XFL == 0 && ExitLevels.ContainsKey(AKey_ADES))
+            {
+                XFL = ExitLevels[AKey_ADES];
+            }
+            else if (XFL == 0)
+            {
+                XFL = 660;
+            }
+
+            return XFL;
         }
 
         //CLOSING

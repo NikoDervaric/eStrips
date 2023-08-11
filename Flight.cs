@@ -113,8 +113,11 @@ namespace eStrips
 
             if (AppliedXFL == 0)
             {
-                AppliedEFL = Flightplan.CruiseAlt;
                 AppliedXFL = Flightplan.CruiseAlt;
+            }
+            if (AppliedEFL == 0)
+            {
+                AppliedEFL = Flightplan.CruiseAlt;
             }
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
