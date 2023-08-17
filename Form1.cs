@@ -18,6 +18,7 @@ using static System.Windows.Forms.LinkLabel;
 using System.Collections;
 using System.Xml.Linq;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 
 namespace eStrips
 {
@@ -501,6 +502,23 @@ namespace eStrips
             return sectorList[2];
         }
 
+        private int GetQNH(string station)
+        {
+            string metar = SendCommand($"#METAR;LJLJ").Split(';')[1];
+            string[] metarSplit = metar.Split(' ');
+
+            foreach (string element in metarSplit)
+            {
+                Match match = Regex.Match(element, @"Q\d{3,4}");
+                if (match.Success)
+                {
+                    return int.Parse(match.Value);
+                }
+            }
+
+            return 1013;
+        }
+
         private void ValidateFlights(string radarResponse)
         {
             validFlights.Clear();
@@ -571,11 +589,9 @@ namespace eStrips
                             flight.InboundSector = ApplyInboundSector(flight);
                             Log("O: " + flight.OutboundSector + " | I: " + flight.InboundSector);
 
-                            //flight.AppliedEFL = ApplyEFLLoA(flight);
-                            //Log($"LOA EFL: {flight.AppliedEFL}");
-
                             flight.AppliedXFL = ApplyXFLLoA(flight);
                             Log($"LOA XFL: {flight.AppliedXFL}");
+                    
                             validFlights.Add(flight);
                             break;
                         }
@@ -659,10 +675,6 @@ namespace eStrips
             if(XFL == 0 && ExitLevels.ContainsKey(AKey_ADES))
             {
                 XFL = ExitLevels[AKey_ADES];
-            }
-            else if (XFL == 0)
-            {
-                XFL = 660;
             }
 
             return XFL;
