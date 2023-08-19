@@ -36,8 +36,10 @@ namespace eStrips
         private readonly Dictionary<string, Point> Airac;
         private readonly Sector mainSector;
         private readonly List<Sector> sectors = new List<Sector>();
-        public List<string> exclusionList = new List<string>();
-        public string exclusionCallsign = string.Empty;
+
+        //Exclusion List and string
+        public static List<string> exclusionList = new List<string>();
+        public static string exclusionCallsign = string.Empty;
 
         //LoAs
         //WRITE THE LOASSS
@@ -172,6 +174,7 @@ namespace eStrips
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 
                 exclusionCallsign = callsign.Value.ToString();
+                Log("Callsing: " + exclusionCallsign);
                 FlightHandler form = new FlightHandler();
                 form.Show();
             }

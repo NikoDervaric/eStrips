@@ -26,8 +26,8 @@ namespace eStrips
 
         private void BtnDelete_Click(object sender, EventArgs e)
         {
-            string callsign = eStrips.instance.exclusionCallsign;
-            eStrips.instance.exclusionList.Add(callsign);
+            string callsign = eStrips.exclusionCallsign;
+            eStrips.exclusionList.Add(callsign);
             instance.Close();
         }
     }
