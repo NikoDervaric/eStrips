@@ -74,7 +74,7 @@ namespace eStrips
         public Waypoint W2 { get; set; }
     }
 
-    internal struct Flight
+    public struct Flight
     {
 
         public string Callsign { get; set; }
@@ -120,7 +120,7 @@ namespace eStrips
         }
     }
 
-    internal struct Flightplan
+    public struct Flightplan
     {
         public string Adep { get; set; }
         public string Ades { get; set; }

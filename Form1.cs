@@ -24,7 +24,6 @@ namespace eStrips
 {
     public partial class eStrips : Form
     {
-        public static eStrips instance;
         private static string[] portFile = File.ReadAllLines(@"..\..\.key");
 
         private System.Timers.Timer timer;
@@ -32,10 +31,12 @@ namespace eStrips
         private static int serverPort = int.Parse(portFile[0]);                    // Replace with your server port number
         private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
 
-        private List<Flight> validFlights = new List<Flight>();
+        public static List<Flight> validFlights = new List<Flight>();
         private readonly Dictionary<string, Point> Airac;
         private readonly Sector mainSector;
         private readonly List<Sector> sectors = new List<Sector>();
+
+        public static List<string> allFlights = new List<string>();
 
         //Exclusion List and string
         public static List<string> exclusionList = new List<string>();
@@ -503,7 +504,7 @@ namespace eStrips
             for (int i = 0; i < sectorList.Count; i++)
             {
 
-               if (sectorList[i] == sectorList[i + 1])
+               if (sectorList[i] == sectorList[i + 2])
                {
                     continue;
                }
@@ -726,6 +727,12 @@ namespace eStrips
         private void BtnCharts_MouseClick(object sender, MouseEventArgs e)
         {
             System.Diagnostics.Process.Start($"https://www.sloveniacontrol.si/acrobat/aip/Operations/history-en-GB.html");
+        }
+
+        private void BtnFlights_Click(object sender, EventArgs e)
+        {
+            FdrModal form = new FdrModal();
+            form.Show();
         }
     }
 }

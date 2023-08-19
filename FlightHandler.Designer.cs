@@ -35,7 +35,7 @@
             // 
             // BtnDelete
             // 
-            this.BtnDelete.Location = new System.Drawing.Point(12, 41);
+            this.BtnDelete.Location = new System.Drawing.Point(88, 40);
             this.BtnDelete.Margin = new System.Windows.Forms.Padding(3, 3, 3, 25);
             this.BtnDelete.Name = "BtnDelete";
             this.BtnDelete.Size = new System.Drawing.Size(71, 25);
@@ -58,13 +58,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(250, 100);
-            this.ControlBox = false;
+            this.ClientSize = new System.Drawing.Size(250, 80);
             this.Controls.Add(this.LblPopup);
             this.Controls.Add(this.BtnDelete);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FlightHandler";
+            this.ShowInTaskbar = false;
             this.Text = "Flight Edit";
             this.ResumeLayout(false);
             this.PerformLayout();

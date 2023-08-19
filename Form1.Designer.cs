@@ -46,6 +46,7 @@
             this.BtnMeteo = new System.Windows.Forms.Button();
             this.BtnLoa = new System.Windows.Forms.Button();
             this.BtnCharts = new System.Windows.Forms.Button();
+            this.BtnFlights = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.stripDataTable)).BeginInit();
             this.SuspendLayout();
             // 
@@ -291,6 +292,22 @@
             this.BtnCharts.UseVisualStyleBackColor = false;
             this.BtnCharts.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnCharts_MouseClick);
             // 
+            // BtnFlights
+            // 
+            this.BtnFlights.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
+            this.BtnFlights.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnFlights.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnFlights.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnFlights.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BtnFlights.Location = new System.Drawing.Point(413, 12);
+            this.BtnFlights.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
+            this.BtnFlights.Name = "BtnFlights";
+            this.BtnFlights.Size = new System.Drawing.Size(120, 35);
+            this.BtnFlights.TabIndex = 4;
+            this.BtnFlights.Text = "FDR";
+            this.BtnFlights.UseVisualStyleBackColor = false;
+            this.BtnFlights.Click += new System.EventHandler(this.BtnFlights_Click);
+            // 
             // eStrips
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -298,6 +315,7 @@
             this.AutoSize = true;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1039, 653);
+            this.Controls.Add(this.BtnFlights);
             this.Controls.Add(this.BtnCharts);
             this.Controls.Add(this.BtnLoa);
             this.Controls.Add(this.BtnMeteo);
@@ -331,6 +349,7 @@
         private System.Windows.Forms.Button BtnMeteo;
         private System.Windows.Forms.Button BtnLoa;
         private System.Windows.Forms.Button BtnCharts;
+        private System.Windows.Forms.Button BtnFlights;
     }
 }
 

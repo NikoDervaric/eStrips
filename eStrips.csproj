@@ -53,6 +53,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FDR.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FDR.Designer.cs">
+      <DependentUpon>FDR.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FdrModal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FdrModal.Designer.cs">
+      <DependentUpon>FdrModal.cs</DependentUpon>
+    </Compile>
     <Compile Include="Flight.cs" />
     <Compile Include="FlightHandler.cs">
       <SubType>Form</SubType>
@@ -68,6 +80,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FDR.resx">
+      <DependentUpon>FDR.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FdrModal.resx">
+      <DependentUpon>FdrModal.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FlightHandler.resx">
       <DependentUpon>FlightHandler.cs</DependentUpon>
     </EmbeddedResource>
