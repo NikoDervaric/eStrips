@@ -24,6 +24,7 @@ namespace eStrips
 {
     public partial class eStrips : Form
     {
+        public static eStrips instance;
         private static string[] portFile = File.ReadAllLines(@"..\..\.key");
 
         private System.Timers.Timer timer;
@@ -35,6 +36,8 @@ namespace eStrips
         private readonly Dictionary<string, Point> Airac;
         private readonly Sector mainSector;
         private readonly List<Sector> sectors = new List<Sector>();
+        public List<string> exclusionList = new List<string>();
+        public string exclusionCallsign = string.Empty;
 
         //LoAs
         //WRITE THE LOASSS
@@ -160,10 +163,17 @@ namespace eStrips
                 }
                 else
                 {
-                    
                     pssr.Value = squawk[2];
                     SendCommand($"#LBSQK;{callsign.Value};{squawk[2]}");
                 }
+            }
+            else if (e.ColumnIndex == 0)
+            {
+                DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
+                
+                exclusionCallsign = callsign.Value.ToString();
+                FlightHandler form = new FlightHandler();
+                form.Show();
             }
         }
 
@@ -445,6 +455,7 @@ namespace eStrips
             // Add the data rows to the DataGridView
             foreach (Flight flight in validFlights)
             {
+                if (exclusionList.Contains(flight.Callsign)) { continue; }
                 stripDataTable.Rows.Add(flight.ShowFlight());
             }
         }

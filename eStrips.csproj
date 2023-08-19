@@ -54,6 +54,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Flight.cs" />
+    <Compile Include="FlightHandler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FlightHandler.Designer.cs">
+      <DependentUpon>FlightHandler.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -62,6 +68,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FlightHandler.resx">
+      <DependentUpon>FlightHandler.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
