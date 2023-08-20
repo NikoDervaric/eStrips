@@ -488,6 +488,7 @@ namespace eStrips
         {
             List<string> sectorList = new List<string>();
 
+            //Add all sectors that have an intersecting segment.
             foreach (var segment in flight.Route)
             {
                 foreach (Sector sect in sectors)
@@ -504,7 +505,7 @@ namespace eStrips
             for (int i = 0; i < sectorList.Count; i++)
             {
 
-               if (sectorList[i] == sectorList[i + 2])
+               if (sectorList[i] == sectorList[i + 1])
                {
                     continue;
                }
@@ -519,15 +520,18 @@ namespace eStrips
 
         private int GetQNH(string station)
         {
-            string metar = SendCommand($"#METAR;LJLJ").Split(';')[1];
+            string metar = SendCommand($"#METAR;{station}").Split(';')[1];
             string[] metarSplit = metar.Split(' ');
 
             foreach (string element in metarSplit)
             {
-                Match match = Regex.Match(element, @"Q\d{3,4}");
+                Match match = Regex.Match(element, @"Q(\d{3,4})");
                 if (match.Success)
                 {
-                    return int.Parse(match.Value);
+                    if (int.TryParse(match.Groups[1].Value, out int qnhValue))
+                    {
+                        return qnhValue;
+                    }
                 }
             }
 
@@ -605,7 +609,10 @@ namespace eStrips
                             Log("O: " + flight.OutboundSector + " | I: " + flight.InboundSector);
 
                             flight.AppliedXFL = ApplyXFLLoA(flight);
-                            Log($"LOA XFL: {flight.AppliedXFL}");
+                            //Log($"LOA XFL: {flight.AppliedXFL}");
+
+                            double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
+                            flight.ComputedFL = ((int)Math.Round(tempCFL / 10)) * 10;
                     
                             validFlights.Add(flight);
                             break;

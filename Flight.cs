@@ -89,7 +89,7 @@ namespace eStrips
         public string AltLbl { get; set; }
         public string SpdLbl { get; set; }
         public Flightplan Flightplan { get; set; }
-        public double ComputedCFL { get; set; }
+        public int ComputedFL { get; set; }
         public int AppliedEFL { get; set; }
         public int AppliedXFL { get; set; }
         public string InboundSector { get; set; }
@@ -106,13 +106,21 @@ namespace eStrips
 
         public string[] ShowFlight()
         {
-            if (AppliedXFL == 0)
+            if (AltLbl == "LND" || AltLbl == "APP" || AltLbl == "GA" || AppliedXFL == 0)
+            {
+                AppliedXFL = ComputedFL;
+            }
+            if (AppliedXFL > Flightplan.CruiseAlt)
             {
                 AppliedXFL = Flightplan.CruiseAlt;
             }
+            /*else if (AppliedXFL > int.Parse(AltLbl))
+            {
+                AppliedXFL = int.Parse(AltLbl);
+            }*/
 
             if (int.TryParse(AltLbl, out int CFL) && CFL < Flightplan.CruiseAlt) { AppliedEFL = CFL; }
-            else { AppliedEFL = Flightplan.CruiseAlt; }
+            else { AppliedEFL = ComputedFL; }
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
                                     $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 

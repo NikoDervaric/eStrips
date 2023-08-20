@@ -45,11 +45,18 @@
             this.FdrAdep = new System.Windows.Forms.TextBox();
             this.FdrAdes = new System.Windows.Forms.TextBox();
             this.FdrRmk = new System.Windows.Forms.TextBox();
-            this.FdrSpdFl = new System.Windows.Forms.TextBox();
+            this.FdrSpd = new System.Windows.Forms.TextBox();
             this.FdrEq = new System.Windows.Forms.TextBox();
             this.FdrAltn = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.BtnReactivateFlight = new System.Windows.Forms.Button();
+            this.BtnDeactivateFlight = new System.Windows.Forms.Button();
+            this.FdrRoute = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.FdrFl = new System.Windows.Forms.TextBox();
+            this.FdrAltn2 = new System.Windows.Forms.TextBox();
+            this.FdrType = new System.Windows.Forms.TextBox();
+            this.FdrWtc = new System.Windows.Forms.TextBox();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // LblCallsign
@@ -58,8 +65,8 @@
             this.LblCallsign.BackColor = System.Drawing.Color.White;
             this.LblCallsign.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LblCallsign.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LblCallsign.Location = new System.Drawing.Point(24, 53);
-            this.LblCallsign.Margin = new System.Windows.Forms.Padding(15, 25, 3, 0);
+            this.LblCallsign.Location = new System.Drawing.Point(5, 7);
+            this.LblCallsign.Margin = new System.Windows.Forms.Padding(5);
             this.LblCallsign.Name = "LblCallsign";
             this.LblCallsign.Size = new System.Drawing.Size(111, 31);
             this.LblCallsign.TabIndex = 0;
@@ -69,16 +76,17 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Location = new System.Drawing.Point(12, 47);
+            this.panel1.Controls.Add(this.LblCallsign);
+            this.panel1.Location = new System.Drawing.Point(12, 37);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(146, 47);
+            this.panel1.Size = new System.Drawing.Size(181, 47);
             this.panel1.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(312, 9);
+            this.label1.Location = new System.Drawing.Point(249, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(35, 16);
             this.label1.TabIndex = 2;
@@ -178,7 +186,7 @@
             this.FdrAC.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FdrAC.Location = new System.Drawing.Point(133, 119);
             this.FdrAC.Name = "FdrAC";
-            this.FdrAC.Size = new System.Drawing.Size(100, 22);
+            this.FdrAC.Size = new System.Drawing.Size(60, 22);
             this.FdrAC.TabIndex = 11;
             // 
             // FdrRules
@@ -188,7 +196,7 @@
             this.FdrRules.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FdrRules.Location = new System.Drawing.Point(133, 149);
             this.FdrRules.Name = "FdrRules";
-            this.FdrRules.Size = new System.Drawing.Size(100, 22);
+            this.FdrRules.Size = new System.Drawing.Size(47, 22);
             this.FdrRules.TabIndex = 12;
             // 
             // FdrAdep
@@ -214,23 +222,23 @@
             // FdrRmk
             // 
             this.FdrRmk.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
-            this.FdrRmk.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.FdrRmk.Cursor = System.Windows.Forms.Cursors.Default;
             this.FdrRmk.Enabled = false;
             this.FdrRmk.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FdrRmk.Location = new System.Drawing.Point(133, 239);
             this.FdrRmk.Name = "FdrRmk";
-            this.FdrRmk.Size = new System.Drawing.Size(387, 22);
+            this.FdrRmk.Size = new System.Drawing.Size(433, 22);
             this.FdrRmk.TabIndex = 15;
             // 
-            // FdrSpdFl
+            // FdrSpd
             // 
-            this.FdrSpdFl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
-            this.FdrSpdFl.Enabled = false;
-            this.FdrSpdFl.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FdrSpdFl.Location = new System.Drawing.Point(420, 121);
-            this.FdrSpdFl.Name = "FdrSpdFl";
-            this.FdrSpdFl.Size = new System.Drawing.Size(100, 22);
-            this.FdrSpdFl.TabIndex = 16;
+            this.FdrSpd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
+            this.FdrSpd.Enabled = false;
+            this.FdrSpd.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrSpd.Location = new System.Drawing.Point(420, 121);
+            this.FdrSpd.Name = "FdrSpd";
+            this.FdrSpd.Size = new System.Drawing.Size(70, 22);
+            this.FdrSpd.TabIndex = 16;
             // 
             // FdrEq
             // 
@@ -239,7 +247,7 @@
             this.FdrEq.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FdrEq.Location = new System.Drawing.Point(420, 149);
             this.FdrEq.Name = "FdrEq";
-            this.FdrEq.Size = new System.Drawing.Size(100, 22);
+            this.FdrEq.Size = new System.Drawing.Size(146, 22);
             this.FdrEq.TabIndex = 17;
             // 
             // FdrAltn
@@ -249,49 +257,115 @@
             this.FdrAltn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FdrAltn.Location = new System.Drawing.Point(420, 179);
             this.FdrAltn.Name = "FdrAltn";
-            this.FdrAltn.Size = new System.Drawing.Size(100, 22);
+            this.FdrAltn.Size = new System.Drawing.Size(70, 22);
             this.FdrAltn.TabIndex = 18;
             // 
-            // button1
+            // BtnReactivateFlight
             // 
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(223)))), ((int)(((byte)(222)))));
-            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(223)))), ((int)(((byte)(222)))));
-            this.button1.FlatAppearance.BorderSize = 0;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button1.Location = new System.Drawing.Point(229, 337);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(217, 26);
-            this.button1.TabIndex = 19;
-            this.button1.Text = "Re-activate flight";
-            this.button1.UseVisualStyleBackColor = false;
+            this.BtnReactivateFlight.BackColor = System.Drawing.Color.White;
+            this.BtnReactivateFlight.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(223)))), ((int)(((byte)(222)))));
+            this.BtnReactivateFlight.FlatAppearance.BorderSize = 0;
+            this.BtnReactivateFlight.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnReactivateFlight.ForeColor = System.Drawing.Color.DarkGreen;
+            this.BtnReactivateFlight.Location = new System.Drawing.Point(229, 364);
+            this.BtnReactivateFlight.Name = "BtnReactivateFlight";
+            this.BtnReactivateFlight.Size = new System.Drawing.Size(217, 26);
+            this.BtnReactivateFlight.TabIndex = 19;
+            this.BtnReactivateFlight.Text = "Re-activate flight";
+            this.BtnReactivateFlight.UseVisualStyleBackColor = false;
+            this.BtnReactivateFlight.Click += new System.EventHandler(this.BtnReactivateFlight_Click);
             // 
-            // button2
+            // BtnDeactivateFlight
             // 
-            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(223)))), ((int)(((byte)(222)))));
-            this.button2.FlatAppearance.BorderSize = 0;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(214)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.button2.Location = new System.Drawing.Point(16, 337);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(177, 26);
-            this.button2.TabIndex = 20;
-            this.button2.Text = "Deactivate";
-            this.button2.UseVisualStyleBackColor = false;
+            this.BtnDeactivateFlight.BackColor = System.Drawing.Color.White;
+            this.BtnDeactivateFlight.FlatAppearance.BorderSize = 0;
+            this.BtnDeactivateFlight.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnDeactivateFlight.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(214)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.BtnDeactivateFlight.Location = new System.Drawing.Point(16, 364);
+            this.BtnDeactivateFlight.Name = "BtnDeactivateFlight";
+            this.BtnDeactivateFlight.Size = new System.Drawing.Size(177, 26);
+            this.BtnDeactivateFlight.TabIndex = 20;
+            this.BtnDeactivateFlight.Text = "Deactivate";
+            this.BtnDeactivateFlight.UseVisualStyleBackColor = false;
+            this.BtnDeactivateFlight.Click += new System.EventHandler(this.BtnDeactivateFlight_Click);
+            // 
+            // FdrRoute
+            // 
+            this.FdrRoute.Font = new System.Drawing.Font("Segoe UI Symbol", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrRoute.Location = new System.Drawing.Point(16, 292);
+            this.FdrRoute.Multiline = true;
+            this.FdrRoute.Name = "FdrRoute";
+            this.FdrRoute.Size = new System.Drawing.Size(550, 57);
+            this.FdrRoute.TabIndex = 1;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(12, 269);
+            this.label10.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(69, 20);
+            this.label10.TabIndex = 21;
+            this.label10.Text = "ROUTE:";
+            // 
+            // FdrFl
+            // 
+            this.FdrFl.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
+            this.FdrFl.Enabled = false;
+            this.FdrFl.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrFl.Location = new System.Drawing.Point(496, 121);
+            this.FdrFl.Name = "FdrFl";
+            this.FdrFl.Size = new System.Drawing.Size(70, 22);
+            this.FdrFl.TabIndex = 22;
+            // 
+            // FdrAltn2
+            // 
+            this.FdrAltn2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
+            this.FdrAltn2.Enabled = false;
+            this.FdrAltn2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrAltn2.Location = new System.Drawing.Point(496, 179);
+            this.FdrAltn2.Name = "FdrAltn2";
+            this.FdrAltn2.Size = new System.Drawing.Size(70, 22);
+            this.FdrAltn2.TabIndex = 23;
+            // 
+            // FdrType
+            // 
+            this.FdrType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
+            this.FdrType.Enabled = false;
+            this.FdrType.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrType.Location = new System.Drawing.Point(186, 149);
+            this.FdrType.Name = "FdrType";
+            this.FdrType.Size = new System.Drawing.Size(47, 22);
+            this.FdrType.TabIndex = 24;
+            // 
+            // FdrWtc
+            // 
+            this.FdrWtc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(231)))), ((int)(((byte)(231)))));
+            this.FdrWtc.Enabled = false;
+            this.FdrWtc.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FdrWtc.Location = new System.Drawing.Point(199, 119);
+            this.FdrWtc.Name = "FdrWtc";
+            this.FdrWtc.Size = new System.Drawing.Size(34, 22);
+            this.FdrWtc.TabIndex = 25;
             // 
             // FDR
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(235)))), ((int)(((byte)(235)))));
-            this.ClientSize = new System.Drawing.Size(704, 461);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(578, 404);
+            this.Controls.Add(this.FdrWtc);
+            this.Controls.Add(this.FdrType);
+            this.Controls.Add(this.FdrAltn2);
+            this.Controls.Add(this.FdrFl);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.FdrRoute);
+            this.Controls.Add(this.BtnDeactivateFlight);
+            this.Controls.Add(this.BtnReactivateFlight);
             this.Controls.Add(this.FdrAltn);
             this.Controls.Add(this.FdrEq);
-            this.Controls.Add(this.FdrSpdFl);
+            this.Controls.Add(this.FdrSpd);
             this.Controls.Add(this.FdrRmk);
             this.Controls.Add(this.FdrAdes);
             this.Controls.Add(this.FdrAdep);
@@ -306,13 +380,14 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.LblCallsign);
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FDR";
             this.Text = "FDR";
             this.Load += new System.EventHandler(this.FDR_Load);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -336,10 +411,16 @@
         private System.Windows.Forms.TextBox FdrAdep;
         private System.Windows.Forms.TextBox FdrAdes;
         private System.Windows.Forms.TextBox FdrRmk;
-        private System.Windows.Forms.TextBox FdrSpdFl;
+        private System.Windows.Forms.TextBox FdrSpd;
         private System.Windows.Forms.TextBox FdrEq;
         private System.Windows.Forms.TextBox FdrAltn;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button BtnReactivateFlight;
+        private System.Windows.Forms.Button BtnDeactivateFlight;
+        private System.Windows.Forms.TextBox FdrRoute;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox FdrFl;
+        private System.Windows.Forms.TextBox FdrAltn2;
+        private System.Windows.Forms.TextBox FdrType;
+        private System.Windows.Forms.TextBox FdrWtc;
     }
 }

@@ -14,20 +14,25 @@ namespace eStrips
     public partial class FdrModal : Form
     {
         public static string callsign = string.Empty;
+        public static FdrModal instance;
 
         public FdrModal()
         {
             InitializeComponent();
+            instance = this;
             TopMost = true;
+            instance.StartPosition = FormStartPosition.Manual;
+            instance.Left = Cursor.Position.X;
+            instance.Top = Cursor.Position.Y;
         }
 
         private void FdrTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) 
+            if (e.KeyCode == Keys.Enter)
             {
                 if (FdrTextBox.Text == string.Empty) { return; }
-
-                callsign = FdrTextBox.Text;
+                if (FdrTextBox.Text != string.Empty) { callsign = FdrTextBox.Text; }
+                if (eStrips.exclusionList.Contains(FlightHandler.callsign)) { callsign = FlightHandler.callsign; }
 
                 FDR form = new FDR();
                 form.Show();
@@ -37,5 +42,6 @@ namespace eStrips
             {
                 Close();
             }
+        }
     }
 }

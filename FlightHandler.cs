@@ -13,6 +13,7 @@ namespace eStrips
     public partial class FlightHandler : Form
     {
         public static FlightHandler instance;
+        public static string callsign = eStrips.exclusionCallsign;
 
         public FlightHandler()
         {
@@ -20,15 +21,26 @@ namespace eStrips
             instance = this;
             instance.TopMost = true;
             instance.StartPosition = FormStartPosition.Manual;
-            instance.Left = System.Windows.Forms.Cursor.Position.X;
-            instance.Top = System.Windows.Forms.Cursor.Position.Y;
+            instance.Left = Cursor.Position.X;
+            instance.Top = Cursor.Position.Y;
         }
 
         private void BtnDelete_Click(object sender, EventArgs e)
         {
-            string callsign = eStrips.exclusionCallsign;
             eStrips.exclusionList.Add(callsign);
             instance.Close();
+        }
+
+        private void BtnFdr_Click(object sender, EventArgs e)
+        {
+            FDR form = new FDR();
+            form.Show();
+            Close();
+        }
+
+        private void FlightHandler_Deactivate(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
