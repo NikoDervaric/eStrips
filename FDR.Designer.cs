@@ -198,6 +198,7 @@
             this.FdrRules.Name = "FdrRules";
             this.FdrRules.Size = new System.Drawing.Size(47, 22);
             this.FdrRules.TabIndex = 12;
+            this.FdrRules.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // FdrAdep
             // 
@@ -338,6 +339,7 @@
             this.FdrType.Name = "FdrType";
             this.FdrType.Size = new System.Drawing.Size(47, 22);
             this.FdrType.TabIndex = 24;
+            this.FdrType.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // FdrWtc
             // 

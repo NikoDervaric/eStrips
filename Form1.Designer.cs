@@ -296,7 +296,6 @@
             // 
             this.BtnFlights.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
             this.BtnFlights.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BtnFlights.Enabled = false;
             this.BtnFlights.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.BtnFlights.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.BtnFlights.ForeColor = System.Drawing.SystemColors.ControlText;
