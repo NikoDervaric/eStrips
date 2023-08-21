@@ -13,7 +13,7 @@ namespace eStrips
     public partial class FDR : Form
     {
         public static FDR instance;
-        public static Flight flight = eStrips.validFlights.Find(f => f.Callsign == FdrModal.callsign);
+        public static Flight flight = eStrips.validFlights[FdrModal.callsign];
 
         public FDR()
         {

@@ -31,7 +31,7 @@ namespace eStrips
         private static int serverPort = int.Parse(portFile[0]);                    // Replace with your server port number
         private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
 
-        public static List<Flight> validFlights = new List<Flight>();
+        public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
         private readonly Dictionary<string, Point> Airac;
         private readonly Sector mainSector;
         private readonly List<Sector> sectors = new List<Sector>();
@@ -126,7 +126,7 @@ namespace eStrips
                 // Update UI controls or display the response
 
                 //List<Flight> validFlights = ValidateFlights(response);
-                PopulateDataGridView(validFlights);
+                PopulateDataGridView();
                 stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
             }));
         }
@@ -449,7 +449,7 @@ namespace eStrips
         }
 
         //TABLE CHECKING AND DATA POPULATION
-        private void PopulateDataGridView(List<Flight> validFlights)  
+        private void PopulateDataGridView()  
         {
             stripDataTable.Rows.Clear();
 
@@ -457,10 +457,10 @@ namespace eStrips
             ValidateFlights(response);
 
             // Add the data rows to the DataGridView
-            foreach (Flight flight in validFlights)
+            foreach(KeyValuePair<string, Flight> flight in validFlights)
             {
-                if (exclusionList.Contains(flight.Callsign)) { continue; }
-                stripDataTable.Rows.Add(flight.ShowFlight());
+                if (exclusionList.Contains(flight.Value.Callsign)) { continue; }
+                stripDataTable.Rows.Add(flight.Value.ShowFlight());
             }
         }
 
@@ -613,8 +613,8 @@ namespace eStrips
 
                             double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
                             flight.ComputedFL = ((int)Math.Round(tempCFL / 10)) * 10;
-                    
-                            validFlights.Add(flight);
+
+                            validFlights.Add(flight.Callsign, flight);
                             break;
                         }
                         else { continue; }
@@ -717,7 +717,7 @@ namespace eStrips
 
             //List<Flight> validFlights = ValidateFlights(response);
             ValidateFlights(response);
-            PopulateDataGridView(validFlights);
+            PopulateDataGridView();
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
         }
 
