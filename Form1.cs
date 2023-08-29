@@ -19,6 +19,7 @@ using System.Collections;
 using System.Xml.Linq;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace eStrips
 {
@@ -105,6 +106,9 @@ namespace eStrips
 
             stripDataTable.DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 180, 180, 180);
             stripDataTable.DefaultCellStyle.SelectionForeColor = Color.Black;
+
+            stripDataTable.Columns["planned_cleared_levels_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
+            stripDataTable.Columns["xfl_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
         }
 
         //  LOGGING
@@ -507,7 +511,7 @@ namespace eStrips
 
                if (sectorList[i] == sectorList[i + 1])
                {
-                    continue;
+                    continue;       
                }
                else
                {
@@ -691,11 +695,13 @@ namespace eStrips
 
             if (ExitLevels.ContainsKey(DKey_ADEP)) 
             {
+                Log(DKey_ADEP);
                 XFL = ExitLevels[DKey_ADEP];
             }
 
             if(XFL == 0 && ExitLevels.ContainsKey(AKey_ADES))
             {
+                Log(AKey_ADES);
                 XFL = ExitLevels[AKey_ADES];
             }
 
@@ -723,7 +729,9 @@ namespace eStrips
 
         private void BtnMeteo_MouseClick(object sender, MouseEventArgs e)
         {
-            System.Diagnostics.Process.Start($"https://meteo.arso.gov.si/met/sl/weather/observ/radar/#rad_faq");
+            //System.Diagnostics.Process.Start($"https://meteo.arso.gov.si/met/sl/weather/observ/radar/#rad_faq");
+            WxWindow wx = new WxWindow();
+            wx.Show();
         }
 
         private void BtnLoa_MouseClick(object sender, MouseEventArgs e)
