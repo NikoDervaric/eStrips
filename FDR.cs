@@ -13,13 +13,14 @@ namespace eStrips
     public partial class FDR : Form
     {
         public static FDR instance;
-        public static Flight flight = eStrips.validFlights[FdrModal.callsign];
+        public static string callsign;
 
-        public FDR()
+        public FDR(string csn)
         {
             InitializeComponent();
             instance = this;
             TopMost = true;
+            callsign = csn;
             instance.StartPosition = FormStartPosition.Manual;
             instance.Left = Cursor.Position.X;
             instance.Top = Cursor.Position.Y;
@@ -29,8 +30,10 @@ namespace eStrips
         {
             LblCallsign.BackColor = Color.FromArgb(0, 235, 100, 100);
 
+            Flight flight = eStrips.validFlights[callsign];
+
             if (flight.Route == null) { return; }
-            LblCallsign.Text = FdrModal.callsign;
+            LblCallsign.Text = callsign;
             FdrAC.Text = flight.Flightplan.AcType;
             FdrWtc.Text = flight.Flightplan.Wtc;
             FdrRules.Text = flight.Flightplan.FlightRules;
@@ -45,24 +48,25 @@ namespace eStrips
             FdrAltn2.Text = string.Empty;
             FdrRoute.Text = string.Join(" ", flight.Flightplan.Route);
 
-            if (eStrips.exclusionCallsign.Contains(FdrModal.callsign))
+            if (eStrips.exclusionCallsign.Contains(callsign))
             { panel1.BackColor = Color.FromArgb(100, 235, 100, 100); }
-            else { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
+            else if (!eStrips.exclusionCallsign.Contains(callsign)) 
+            { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
         }
 
         private void BtnReactivateFlight_Click(object sender, EventArgs e)
         {
-            if (!eStrips.exclusionList.Contains(FdrModal.callsign)) { return; }
+            if (!eStrips.exclusionList.Contains(callsign)) { return; }
 
-            eStrips.exclusionList.Remove(LblCallsign.Text);
+            eStrips.exclusionList.Remove(callsign);
             panel1.BackColor = Color.FromArgb(255, 206, 255, 206);
         }
 
         private void BtnDeactivateFlight_Click(object sender, EventArgs e)
         {
-            if (eStrips.exclusionList.Contains(FdrModal.callsign)) { return; }
+            if (eStrips.exclusionList.Contains(callsign)) { return; }
 
-            eStrips.exclusionList.Add(LblCallsign.Text);
+            eStrips.exclusionList.Add(callsign);
             panel1.BackColor = Color.FromArgb(100, 235, 100, 100);
         }
     }

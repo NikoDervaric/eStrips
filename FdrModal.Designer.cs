@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FdrModal));
             this.label1 = new System.Windows.Forms.Label();
             this.FdrTextBox = new System.Windows.Forms.TextBox();
+            this.LblInfo = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -50,11 +51,21 @@
             this.FdrTextBox.TabIndex = 1;
             this.FdrTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FdrTextBox_KeyDown);
             // 
+            // LblInfo
+            // 
+            this.LblInfo.AutoSize = true;
+            this.LblInfo.ForeColor = System.Drawing.Color.Red;
+            this.LblInfo.Location = new System.Drawing.Point(100, 67);
+            this.LblInfo.Name = "LblInfo";
+            this.LblInfo.Size = new System.Drawing.Size(0, 13);
+            this.LblInfo.TabIndex = 2;
+            // 
             // FdrModal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(283, 92);
+            this.Controls.Add(this.LblInfo);
             this.Controls.Add(this.FdrTextBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -71,5 +82,6 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox FdrTextBox;
+        private System.Windows.Forms.Label LblInfo;
     }
 }

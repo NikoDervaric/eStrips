@@ -57,7 +57,6 @@
             // 
             // BtnFdr
             // 
-            this.BtnFdr.Enabled = false;
             this.BtnFdr.Location = new System.Drawing.Point(140, 40);
             this.BtnFdr.Margin = new System.Windows.Forms.Padding(3, 3, 3, 25);
             this.BtnFdr.Name = "BtnFdr";

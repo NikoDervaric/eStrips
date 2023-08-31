@@ -34,7 +34,7 @@ namespace eStrips
 
         private void BtnFdr_Click(object sender, EventArgs e)
         {
-            FDR form = new FDR();
+            FDR form = new FDR(callsign);
             form.Show();
             Close();
         }

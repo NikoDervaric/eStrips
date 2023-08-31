@@ -13,7 +13,6 @@ namespace eStrips
 {
     public partial class FdrModal : Form
     {
-        public static string callsign = string.Empty;
         public static FdrModal instance;
 
         public FdrModal()
@@ -30,14 +29,22 @@ namespace eStrips
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (FdrTextBox.Text == string.Empty) { return; }
-                if (FdrTextBox.Text != string.Empty) { callsign = FdrTextBox.Text; }
+                e.Handled = true;
+                e.SuppressKeyPress = true;
 
-                if (!eStrips.validFlights.ContainsKey(callsign)) { return; };
+                if (FdrTextBox.Text == string.Empty) 
+                {
+                    LblInfo.Text = "Enter a flight!";
+                    return; 
+                }
 
-                if (eStrips.exclusionList.Contains(FlightHandler.callsign)) { callsign = FlightHandler.callsign; }
+                if (!eStrips.validFlights.ContainsKey(FdrTextBox.Text)) 
+                {
+                    LblInfo.Text = "Flight not found!";
+                    return; 
+                };
 
-                FDR form = new FDR();
+                FDR form = new FDR(FdrTextBox.Text);
                 form.Show();
                 Close();
             }
