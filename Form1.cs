@@ -19,7 +19,6 @@ using System.Collections;
 using System.Xml.Linq;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
-using System.Reflection;
 
 namespace eStrips
 {
@@ -147,9 +146,12 @@ namespace eStrips
                 string[] parts = route.Value.ToString().Split(' ');
 
                 string fullRoute = adep.Value.ToString() + "%20" + string.Join("%20", parts) + "%20" + ades.Value.ToString();
-                //Log(fullRoute);
-                
-                System.Diagnostics.Process.Start($"https://skyvector.com/?ll=46.12757152789378,14.788330080764661&chart=304&zoom=5&fpl={fullRoute}");
+                string url = $"https://skyvector.com/?ll=46.12757152789378,14.788330080764661&chart=304&zoom=5&fpl={fullRoute}";
+
+                /*RouteView wx = new RouteView(url);
+                wx.Show();*/
+
+                System.Diagnostics.Process.Start(url);
             }
             else { return; }
         }
@@ -178,9 +180,8 @@ namespace eStrips
             {
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 
-                exclusionCallsign = callsign.Value.ToString();
-                Log("Callsing: " + exclusionCallsign);
-                FlightHandler form = new FlightHandler();
+                Log("Callsing: " + callsign.Value.ToString());
+                FlightHandler form = new FlightHandler(callsign.Value.ToString());
                 form.Show();
             }
         }
@@ -199,13 +200,11 @@ namespace eStrips
                 if (parts.Length == 3)
                 {
                     string name = parts[0];
-                    double latitude = 0.0;
-                    double longitude = 0.0;
 
-                    if (double.TryParse(parts[1], out latitude) && double.TryParse(parts[2], out longitude))
+                    if (double.TryParse(parts[1], out double latitude) && double.TryParse(parts[2], out double longitude))
                     {
                         //Log(latitude + " | " + longitude);
-                        Point point = new Point ( Math.Round(latitude, 5), Math.Round(longitude, 5));
+                        Point point = new Point(Math.Round(latitude, 5), Math.Round(longitude, 5));
                         dictionary[name] = point;
                     }
                     else
@@ -453,7 +452,7 @@ namespace eStrips
         }
 
         //TABLE CHECKING AND DATA POPULATION
-        private void PopulateDataGridView()  
+        private void PopulateDataGridView()
         {
             stripDataTable.Rows.Clear();
 
@@ -499,6 +498,7 @@ namespace eStrips
                 {
                     if (IntersectsSector(segment, sect))
                     {
+                        //Log(sect.Name);
                         sectorList.Add(sect.Name);
                     }
                 }
@@ -511,12 +511,13 @@ namespace eStrips
 
                if (sectorList[i] == sectorList[i + 1])
                {
-                    continue;       
+                    continue;
                }
-               else
+               else if (sectorList[i] != sectorList[i + 1])
                {
                     return sectorList[i+1];
                }
+               else { return sectorList[i]; }
             }
 
             return sectorList[2];
@@ -699,7 +700,7 @@ namespace eStrips
                 XFL = ExitLevels[DKey_ADEP];
             }
 
-            if(XFL == 0 && ExitLevels.ContainsKey(AKey_ADES))
+            if(ExitLevels.ContainsKey(AKey_ADES))
             {
                 Log(AKey_ADES);
                 XFL = ExitLevels[AKey_ADES];
@@ -729,7 +730,16 @@ namespace eStrips
 
         private void BtnMeteo_MouseClick(object sender, MouseEventArgs e)
         {
-            //System.Diagnostics.Process.Start($"https://meteo.arso.gov.si/met/sl/weather/observ/radar/#rad_faq");
+            FormCollection fc = Application.OpenForms;
+            // Check if form is open
+            foreach (Form frm in fc)
+            {
+                if (frm.Name == "WxWindow")
+                {
+                    return;
+                }
+            }
+
             WxWindow wx = new WxWindow();
             wx.Show();
         }

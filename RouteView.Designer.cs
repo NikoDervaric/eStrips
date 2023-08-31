@@ -1,6 +1,6 @@
 ﻿namespace eStrips
 {
-    partial class WxWindow
+    partial class RouteView
     {
         /// <summary>
         /// Required designer variable.
@@ -28,42 +28,40 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WxWindow));
-            this.WxBrowser = new System.Windows.Forms.WebBrowser();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RouteView));
+            this.RouteBrowser = new System.Windows.Forms.WebBrowser();
             this.SuspendLayout();
             // 
-            // WxBrowser
+            // RouteBrowser
             // 
-            this.WxBrowser.AllowNavigation = false;
-            this.WxBrowser.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.WxBrowser.Location = new System.Drawing.Point(-204, -162);
-            this.WxBrowser.MinimumSize = new System.Drawing.Size(20, 20);
-            this.WxBrowser.Name = "WxBrowser";
-            this.WxBrowser.ScrollBarsEnabled = false;
-            this.WxBrowser.Size = new System.Drawing.Size(699, 534);
-            this.WxBrowser.TabIndex = 0;
-            this.WxBrowser.Url = new System.Uri("https://meteo.arso.gov.si/uploads/probase/www/observ/radar/si0-rm-anim.gif", System.UriKind.Absolute);
+            this.RouteBrowser.AllowNavigation = false;
+            this.RouteBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.RouteBrowser.Location = new System.Drawing.Point(0, 0);
+            this.RouteBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.RouteBrowser.Name = "RouteBrowser";
+            this.RouteBrowser.ScriptErrorsSuppressed = true;
+            this.RouteBrowser.Size = new System.Drawing.Size(800, 450);
+            this.RouteBrowser.TabIndex = 1;
+            this.RouteBrowser.Url = new System.Uri("https://skyvector.com", System.UriKind.Absolute);
             // 
-            // WxWindow
+            // RouteView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoScroll = true;
-            this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(495, 372);
-            this.Controls.Add(this.WxBrowser);
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.RouteBrowser);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "WxWindow";
-            this.ShowInTaskbar = false;
-            this.Text = "Wx Radar";
+            this.Name = "RouteView";
+            this.Text = "Route View";
             this.TopMost = true;
+            this.Load += new System.EventHandler(this.RouteView_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser WxBrowser;
+        private System.Windows.Forms.WebBrowser RouteBrowser;
     }
 }

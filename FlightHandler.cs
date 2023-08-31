@@ -13,12 +13,13 @@ namespace eStrips
     public partial class FlightHandler : Form
     {
         public static FlightHandler instance;
-        public static string callsign = eStrips.exclusionCallsign;
+        public static string callsign;
 
-        public FlightHandler()
+        public FlightHandler(string csn)
         {
             InitializeComponent();
             instance = this;
+            callsign = csn;
             instance.TopMost = true;
             instance.StartPosition = FormStartPosition.Manual;
             instance.Left = Cursor.Position.X;

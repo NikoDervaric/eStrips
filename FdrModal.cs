@@ -32,6 +32,9 @@ namespace eStrips
             {
                 if (FdrTextBox.Text == string.Empty) { return; }
                 if (FdrTextBox.Text != string.Empty) { callsign = FdrTextBox.Text; }
+
+                if (!eStrips.validFlights.ContainsKey(callsign)) { return; };
+
                 if (eStrips.exclusionList.Contains(FlightHandler.callsign)) { callsign = FlightHandler.callsign; }
 
                 FDR form = new FDR();
