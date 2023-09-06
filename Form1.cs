@@ -19,12 +19,14 @@ using System.Collections;
 using System.Xml.Linq;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace eStrips
 {
     public partial class eStrips : Form
     {
-        private static string[] portFile = File.ReadAllLines(@"..\..\.key");
+        private static string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private static string[] portFile = File.ReadAllLines($"{cwd}/.key");
 
         private System.Timers.Timer timer;
         private const string serverAddress = "127.0.0.1";       // Replace with your server IP address
@@ -188,7 +190,7 @@ namespace eStrips
 
         public static Dictionary<string, Point> LoadAirac()
         {
-            string[] lines = File.ReadAllLines(@"..\..\airac.txt");
+            string[] lines = File.ReadAllLines(@"airac.txt");
             var dictionary = new Dictionary<string, Point>();
 
             foreach (var line in lines)
@@ -223,7 +225,7 @@ namespace eStrips
 
         public Sector LoadMainSector()
         {
-            string[] filePath = Directory.GetFiles($"../../sectors", "*.msct");
+            string[] filePath = Directory.GetFiles($"{cwd}/sectors", "*.msct");
             var lines = File.ReadAllLines(filePath[0]);
             var sector = new Sector { Points = new List<Point>() };
 
@@ -247,7 +249,7 @@ namespace eStrips
 
         public List<Sector> LoadSectors()
         {
-            string[] filePath = Directory.GetFiles($"../../sectors", "*.sct");
+            string[] filePath = Directory.GetFiles($"{cwd}/sectors", "*.sct");
             List<Sector> sectors = new List<Sector>();
 
             foreach (string sectorName in filePath)
@@ -280,7 +282,7 @@ namespace eStrips
 
         private void LoadLoAs()
         {
-            string[] lines = File.ReadAllLines(@"..\..\loa.txt");
+            string[] lines = File.ReadAllLines($"{cwd}/loa.txt");
 
             foreach (string line in lines)
             {

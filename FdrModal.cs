@@ -44,7 +44,7 @@ namespace eStrips
                     return; 
                 };
 
-                FDR form = new FDR(FdrTextBox.Text);
+                FDR form = new FDR(FdrTextBox.Text.ToUpper());
                 form.Show();
                 Close();
             }
