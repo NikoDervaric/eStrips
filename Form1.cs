@@ -1,23 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Timers;
-using System.Threading;
-using System.Security.Permissions;
-using System.Runtime.CompilerServices;
-using static System.Windows.Forms.LinkLabel;
-using System.Collections;
-using System.Xml.Linq;
-using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Reflection;
 
@@ -29,9 +19,9 @@ namespace eStrips
         private static string[] portFile = File.ReadAllLines($"{cwd}/.key");
 
         private System.Timers.Timer timer;
-        private const string serverAddress = "127.0.0.1";       // Replace with your server IP address
-        private static int serverPort = int.Parse(portFile[0]);                    // Replace with your server port number
-        private const int sendInterval = 5000;                 // Interval between sending messages (in milliseconds)
+        private const string serverAddress = "127.0.0.1";           // Replace with your server IP address
+        private static int serverPort = int.Parse(portFile[0]);     // Replace with your server port number
+        private const int sendInterval = 5000;                      // Interval between sending messages (in milliseconds)
 
         public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
         private readonly Dictionary<string, Point> Airac;
@@ -500,7 +490,7 @@ namespace eStrips
                 {
                     if (IntersectsSector(segment, sect))
                     {
-                        //Log(sect.Name);
+                        Log(sect.Name);
                         sectorList.Add(sect.Name);
                     }
                 }
@@ -522,7 +512,7 @@ namespace eStrips
                else { return sectorList[i]; }
             }
 
-            return sectorList[2];
+            return sectorList[0];
         }
 
         private int GetQNH(string station)
@@ -615,7 +605,7 @@ namespace eStrips
                             flight.InboundSector = ApplyInboundSector(flight);
                             Log("O: " + flight.OutboundSector + " | I: " + flight.InboundSector);
 
-                            flight.AppliedXFL = ApplyXFLLoA(flight);
+                            flight.Loa_xfls = ApplyXFLLoA(flight);
                             //Log($"LOA XFL: {flight.AppliedXFL}");
 
                             double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
@@ -686,29 +676,29 @@ namespace eStrips
             return 0;
         }
 
-        private int ApplyXFLLoA(Flight flight)
+        private List<int> ApplyXFLLoA(Flight flight)
         {
+            List<int> loa_xfls = new List<int>();
+
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
 
             string DKey_ADEP = 'D' + ADEP + flight.InboundSector;
             string AKey_ADES = 'A' + ADES + flight.InboundSector;
 
-            int XFL = 0;
-
             if (ExitLevels.ContainsKey(DKey_ADEP)) 
             {
                 Log(DKey_ADEP);
-                XFL = ExitLevels[DKey_ADEP];
+                loa_xfls.Add(ExitLevels[DKey_ADEP]);
             }
 
             if(ExitLevels.ContainsKey(AKey_ADES))
             {
                 Log(AKey_ADES);
-                XFL = ExitLevels[AKey_ADES];
+                loa_xfls.Add(ExitLevels[AKey_ADES]);
             }
 
-            return XFL;
+            return loa_xfls;
         }
 
         //CLOSING

@@ -24,12 +24,11 @@ namespace eStrips
             instance.StartPosition = FormStartPosition.Manual;
             instance.Left = Cursor.Position.X;
             instance.Top = Cursor.Position.Y;
+            panel1.BackColor = Color.FromArgb(255, 235, 100, 100);
         }
 
         private void FDR_Load(object sender, EventArgs e)
         {
-            LblCallsign.BackColor = Color.FromArgb(0, 235, 100, 100);
-
             Flight flight = eStrips.validFlights[callsign];
 
             if (flight.Route == null) { return; }
@@ -49,9 +48,8 @@ namespace eStrips
             FdrRoute.Text = string.Join(" ", flight.Flightplan.Route);
 
             if (eStrips.exclusionCallsign.Contains(callsign))
-            { panel1.BackColor = Color.FromArgb(100, 235, 100, 100); }
-            else if (!eStrips.exclusionCallsign.Contains(callsign)) 
-            { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
+            { panel1.BackColor = Color.FromArgb(255, 235, 100, 100); }
+            else { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
         }
 
         private void BtnReactivateFlight_Click(object sender, EventArgs e)

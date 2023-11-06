@@ -62,7 +62,7 @@
             // LblCallsign
             // 
             this.LblCallsign.AutoSize = true;
-            this.LblCallsign.BackColor = System.Drawing.Color.White;
+            this.LblCallsign.BackColor = System.Drawing.Color.Transparent;
             this.LblCallsign.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.LblCallsign.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LblCallsign.Location = new System.Drawing.Point(5, 7);
@@ -74,7 +74,7 @@
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.White;
+            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.LblCallsign);
             this.panel1.Location = new System.Drawing.Point(12, 37);

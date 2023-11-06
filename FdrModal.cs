@@ -38,7 +38,7 @@ namespace eStrips
                     return; 
                 }
 
-                if (!eStrips.validFlights.ContainsKey(FdrTextBox.Text)) 
+                if (!eStrips.validFlights.ContainsKey(FdrTextBox.Text.ToUpper())) 
                 {
                     LblInfo.Text = "Flight not found!";
                     return; 

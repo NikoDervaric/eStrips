@@ -24,6 +24,16 @@ namespace eStrips
             instance.StartPosition = FormStartPosition.Manual;
             instance.Left = Cursor.Position.X;
             instance.Top = Cursor.Position.Y;
+            SetCursorOnBtnDelete();
+        }
+
+        private void SetCursorOnBtnDelete() {
+            // Set the Current cursor, move the cursor's Position,
+            // and set its clipping rectangle to the form. 
+
+            this.Cursor = new Cursor(Cursor.Current.Handle);
+            Cursor.Position = new System.Drawing.Point(Cursor.Position.X + 65, Cursor.Position.Y + 80);
+            Cursor.Clip = new Rectangle(this.Location, this.Size);
         }
 
         private void BtnDelete_Click(object sender, EventArgs e)
