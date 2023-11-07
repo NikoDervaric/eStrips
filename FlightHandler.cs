@@ -32,7 +32,7 @@ namespace eStrips
             // and set its clipping rectangle to the form. 
 
             this.Cursor = new Cursor(Cursor.Current.Handle);
-            Cursor.Position = new System.Drawing.Point(Cursor.Position.X + 65, Cursor.Position.Y + 80);
+            Cursor.Position = new System.Drawing.Point(Cursor.Position.X + 67, Cursor.Position.Y + 85);
             Cursor.Clip = new Rectangle(this.Location, this.Size);
         }
 

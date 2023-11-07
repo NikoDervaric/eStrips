@@ -536,6 +536,35 @@ namespace eStrips
             return 1013;
         }
 
+        // Applies XFLs and EFLs to validated flights
+        private void ApplyLoa(Flight flight)
+        {
+            flight.Route = ProcessRoute(flight);
+
+            foreach (Line line in flight.Route)
+            {
+                if (IntersectsSector(line, mainSector))
+                {
+                    Log(flight.Callsign + " has intersection");
+
+                    flight.OutboundSector = ApplyOutboundSector(flight);
+                    flight.InboundSector = ApplyInboundSector(flight);
+                    Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector + "\n");
+
+                    flight.Loa_efls = ApplyEFLLoA(flight);
+                    flight.Loa_xfls = ApplyXFLLoA(flight);
+                    //Log($"LOA XFL: {flight.AppliedXFL}");
+
+                    double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
+                    flight.ComputedFL = ((int)Math.Round(tempCFL / 10)) * 10;
+
+                    validFlights.Add(flight.Callsign, flight);
+                    break;
+                }
+                else { continue; }
+            }
+        }
+        
         private void ValidateFlights(string radarResponse)
         {
             validFlights.Clear();
@@ -593,33 +622,13 @@ namespace eStrips
                         },
                         AppliedXFL = 0
                     };
-                    
-                    flight.Route = ProcessRoute(flight);
-                    
-                    foreach (Line line in flight.Route)
-                    {
-                        if (IntersectsSector(line, mainSector))
-                        {
-                            Log(flight.Callsign + " has intersection");
 
-                            flight.OutboundSector = ApplyOutboundSector(flight);
-                            flight.InboundSector = ApplyInboundSector(flight);
-                            Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
-
-                            flight.Loa_xfls = ApplyXFLLoA(flight);
-                            //Log($"LOA XFL: {flight.AppliedXFL}");
-
-                            double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
-                            flight.ComputedFL = ((int)Math.Round(tempCFL / 10)) * 10;
-
-                            validFlights.Add(flight.Callsign, flight);
-                            break;
-                        }
-                        else { continue; }
-                    }
+                    ApplyLoa(flight);
                 }
                 else { continue; }
+
             }
+            //Log("===========================================");
         }
 
         private List<Line> ProcessRoute(Flight flight)
@@ -655,26 +664,26 @@ namespace eStrips
             return route_segments;
         }
 
-        private int ApplyEFLLoA(Flight flight)
+        private List<int> ApplyEFLLoA(Flight flight)
         {
+            List<int> loa_efls = new List<int>();
+
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
 
             string DKey_ADEP = 'D' + ADEP + flight.OutboundSector;
             string AKey_ADES = 'A' + ADES + flight.OutboundSector;
 
-            /*if (EntryLevels.ContainsKey(EFLKey1))
+            if (EntryLevels.ContainsKey(DKey_ADEP))
             {
-                Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADEP + " EFL Key: " + EFLKey1);
-                return EntryLevels[EFLKey1];
+                loa_efls.Add(EntryLevels[DKey_ADEP]);
             }
-            else if (EntryLevels.ContainsKey(EFLKey2))
+            else if (EntryLevels.ContainsKey(AKey_ADES))
             {
-                Log("LOA APPLIED to C/S: " + flight.Callsign + " DEP: " + ADES + " EFL Key: " + EFLKey2);
-                return EntryLevels[EFLKey2];
-            }*/
+                loa_efls.Add(EntryLevels[AKey_ADES]);
+            }
 
-            return 0;
+            return loa_efls;
         }
 
         private List<int> ApplyXFLLoA(Flight flight)
