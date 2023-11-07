@@ -47,9 +47,8 @@ namespace eStrips
             FdrAltn2.Text = string.Empty;
             FdrRoute.Text = string.Join(" ", flight.Flightplan.Route);
 
-            if (eStrips.exclusionCallsign.Contains(callsign))
-            { panel1.BackColor = Color.FromArgb(255, 235, 100, 100); }
-            else { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
+            if (!eStrips.exclusionCallsign.Contains(callsign))
+            { panel1.BackColor = Color.FromArgb(255, 206, 255, 206); }
         }
 
         private void BtnReactivateFlight_Click(object sender, EventArgs e)
