@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B6F5EAC7-7DF4-411A-88B9-6C1D6276F674}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>eStrips</RootNamespace>
     <AssemblyName>eStrips</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>

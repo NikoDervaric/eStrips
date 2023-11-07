@@ -496,23 +496,23 @@ namespace eStrips
                 }
             }
 
-            if (sectorList.Count == 1) { return sectorList[0]; }
+            //  Returns the first sector if flight doesn't leave FIR
+            if (sectorList.Count == 1 && sectorList[0] == "LJLA") { return sectorList[0]; }
 
-            for (int i = 0; i < sectorList.Count; i++)
+            if (sectorList.Count == 2 && sectorList[0] != sectorList[1] ) { return sectorList[1]; }
+
+            if (sectorList.Count > 2)
             {
-
-               if (sectorList[i] == sectorList[i + 1])
-               {
+                int i = 0;
+                while (sectorList[i] == sectorList[i+1])
+                {
+                    i++;
                     continue;
-               }
-               else if (sectorList[i] != sectorList[i + 1])
-               {
-                    return sectorList[i+1];
-               }
-               else { return sectorList[i]; }
+                }
+                return sectorList[i];
             }
 
-            return sectorList[0];
+            return "LJLA";
         }
 
         private int GetQNH(string station)
