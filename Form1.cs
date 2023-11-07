@@ -21,7 +21,7 @@ namespace eStrips
         private System.Timers.Timer timer;
         private const string serverAddress = "127.0.0.1";           // Replace with your server IP address
         private static int serverPort = int.Parse(portFile[0]);     // Replace with your server port number
-        private const int sendInterval = 5000;                      // Interval between sending messages (in milliseconds)
+        private const int sendInterval = 3000;                      // Interval between sending messages (in milliseconds)
 
         public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
         private readonly Dictionary<string, Point> Airac;
@@ -460,6 +460,7 @@ namespace eStrips
         }
 
         //FLIGHT FILTERING AND PROCESSING
+        // Applies the sector flight is coming from
         private string ApplyOutboundSector(Flight flight)
         {
             string outboundSector = "";
@@ -479,7 +480,8 @@ namespace eStrips
             return outboundSector;
         }
 
-        private string ApplyInboundSector(Flight flight)
+        // Applies the sector the flight will be entering
+        private string ApplyInboundSector(Flight flight)    
         {
             List<string> sectorList = new List<string>();
 
@@ -490,7 +492,6 @@ namespace eStrips
                 {
                     if (IntersectsSector(segment, sect))
                     {
-                        Log(sect.Name);
                         sectorList.Add(sect.Name);
                     }
                 }
@@ -603,7 +604,7 @@ namespace eStrips
 
                             flight.OutboundSector = ApplyOutboundSector(flight);
                             flight.InboundSector = ApplyInboundSector(flight);
-                            Log("O: " + flight.OutboundSector + " | I: " + flight.InboundSector);
+                            Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
 
                             flight.Loa_xfls = ApplyXFLLoA(flight);
                             //Log($"LOA XFL: {flight.AppliedXFL}");
@@ -714,7 +715,6 @@ namespace eStrips
             TopMost = true;
             string response = SendCommand("#TR");
 
-            //List<Flight> validFlights = ValidateFlights(response);
             ValidateFlights(response);
             PopulateDataGridView();
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
