@@ -65,9 +65,10 @@ namespace eStrips
 
             // If XFL is greater than cruise altitude, the XFL will be set to cruise alt
             if (AppliedXFL > Flightplan.CruiseAlt) { AppliedXFL = Flightplan.CruiseAlt; }
-            
+
             for (int i = 0; i < Loa_xfls.Count;)
             {
+                Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | " + Loa_xfls[i]);
                 if (Loa_xfls[i] < AppliedXFL) { AppliedXFL = Loa_xfls[i]; }
             }
 
