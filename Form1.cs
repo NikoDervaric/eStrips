@@ -481,39 +481,89 @@ namespace eStrips
         }
 
         // Applies the sector the flight will be entering
-        private string ApplyInboundSector(Flight flight)    
+        private Tuple<string, int> ApplyInboundSector(Flight flight)    
         {
-            List<string> sectorList = new List<string>();
+            List<Tuple<string, int>> sectorList = new List<Tuple<string, int>>();
+            List<string> sectorNames = new List<string>();
+            int outboundIndex = 0;
 
             //Add all sectors that have an intersecting segment.
             foreach (var segment in flight.Route)
             {
                 foreach (Sector sect in sectors)
                 {
-                    if (IntersectsSector(segment, sect))
+                    if (IntersectsSector(segment, sect) && !sectorNames.Contains(sect.Name))
                     {
-                        sectorList.Add(sect.Name);
+                        sectorList.Add(new Tuple<string, int>(sect.Name, outboundIndex));
                     }
+                    else { continue; }
                 }
+                outboundIndex++;
             }
 
+            Log($"Sector count: {sectorList.Count()}");
+
             //  Returns the first sector if flight doesn't leave FIR
-            if (sectorList.Count == 1 && sectorList[0] == "LJLA") { return sectorList[0]; }
+            if (sectorNames.Count == 1 && sectorNames[0] == "LJLA") { return sectorList[0]; }
 
-            if (sectorList.Count == 2 && sectorList[0] != sectorList[1] ) { return sectorList[1]; }
+            //  Returns if traffic is departing or arriving into FIR
+            if (sectorNames.Count == 2 && sectorNames[0] != sectorNames[1] ) { return sectorList[1]; }
 
-            if (sectorList.Count > 2)
+            if (sectorNames.Count > 2)
             {
                 int i = 0;
-                while (sectorList[i] == sectorList[i+1])
+                while (sectorNames[i] == sectorNames[i+1])
                 {
                     i++;
                     continue;
                 }
-                return sectorList[i];
+                return new Tuple<string, int>(sectorNames[i+1], outboundIndex);
             }
 
-            return "LJLA";
+            return new Tuple<string, int>("LJLA", 0);
+        }
+
+        private List<string> ApplySectors(Flight flight)
+        {
+            string outboundSector = string.Empty;
+            string inboundSector  = string.Empty;
+            List<string> appliedSectors = new List<string>();
+
+            int outboundSegmentIndex = 0;
+            int inboundSegmentIndex = 0;
+
+            // Determine outbound sector / previous sector
+            foreach (var segment in flight.Route)
+            {
+                foreach (Sector sect in sectors)
+                {
+                    if (IntersectsSector(segment, sect))
+                    {
+                        outboundSector = sect.Name;
+                        break;
+                    }
+                }
+                outboundSegmentIndex++;
+            }
+
+            // Determine inbound sector / next sector
+            Tuple<string, int> inboundSectTuple = ApplyInboundSector(flight);
+            inboundSector = inboundSectTuple.Item1;
+            inboundSegmentIndex = inboundSectTuple.Item2;
+
+            if (inboundSegmentIndex > outboundSegmentIndex)
+            {
+                appliedSectors.Add(inboundSector);
+                appliedSectors.Add(outboundSector);
+                return appliedSectors;
+            }
+            else
+            {
+                appliedSectors.Add(outboundSector);
+                appliedSectors.Add(inboundSector);
+            }
+
+            return appliedSectors;
         }
 
         private int GetQNH(string station)
@@ -547,8 +597,11 @@ namespace eStrips
                 {
                     Log(flight.Callsign + " has intersection");
 
-                    flight.OutboundSector = ApplyOutboundSector(flight);
-                    flight.InboundSector = ApplyInboundSector(flight);
+                    /*flight.OutboundSector = ApplyOutboundSector(flight);
+                    flight.InboundSector = ApplyInboundSector(flight);*/
+
+                    flight.OutboundSector = ApplySectors(flight)[0];
+                    flight.InboundSector = ApplySectors(flight)[1];
                     Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector + "\n");
 
                     flight.Loa_efls = ApplyEFLLoA(flight);
