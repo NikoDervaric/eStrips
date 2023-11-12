@@ -21,7 +21,7 @@ namespace eStrips
         private System.Timers.Timer timer;
         private const string serverAddress = "127.0.0.1";           // Replace with your server IP address
         private static int serverPort = int.Parse(portFile[0]);     // Replace with your server port number
-        private const int sendInterval = 3000;                      // Interval between sending messages (in milliseconds)
+        private const int sendInterval = 15000;                      // Interval between sending messages (in milliseconds)
 
         public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
         private readonly Dictionary<string, Point> Airac;
@@ -461,106 +461,96 @@ namespace eStrips
 
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
-        private string ApplyOutboundSector(Flight flight)
+        private Tuple<string, int> ApplyOutboundSector(Flight flight)
         {
-            string outboundSector = "";
+            // Determine outbound sector / previous sector
+            string outboundSector = string.Empty;
+            int outboundSegmentIndex = 0;
 
-            foreach(var segment in flight.Route)
+            for (int i = 0; i < flight.Route.Count; i++)
             {
-                foreach(Sector sect in sectors)
+                foreach (Sector sect in sectors)
                 {
-                    if (IntersectsSector(segment, sect))
+                    if (IntersectsSector(flight.Route[i], sect))
                     {
                         outboundSector = sect.Name;
-                        return outboundSector;
+                        outboundSegmentIndex = i;
+                        return new Tuple<string, int>(outboundSector, i);
                     }
                 }
             }
-
-            return outboundSector;
+            Log($"OUT index: {outboundSegmentIndex}");
+            return new Tuple<string, int>("LJLA", 0);
         }
 
         // Applies the sector the flight will be entering
         private Tuple<string, int> ApplyInboundSector(Flight flight)    
         {
-            List<Tuple<string, int>> sectorList = new List<Tuple<string, int>>();
+            List<Tuple<string, int>> sectorTuples = new List<Tuple<string, int>>();
             List<string> sectorNames = new List<string>();
             int outboundIndex = 0;
 
             //Add all sectors that have an intersecting segment.
-            foreach (var segment in flight.Route)
+            for (int i = 0; i < flight.Route.Count; i++)
             {
                 foreach (Sector sect in sectors)
                 {
-                    if (IntersectsSector(segment, sect) && !sectorNames.Contains(sect.Name))
+                    if (IntersectsSector(flight.Route[i], sect) && !sectorNames.Contains(sect.Name))
                     {
-                        sectorList.Add(new Tuple<string, int>(sect.Name, outboundIndex));
+                        Log("Sector: " +  sect.Name + " | Index: " + i);
+                        sectorTuples.Add(new Tuple<string, int>(sect.Name, i));
                     }
                     else { continue; }
                 }
-                outboundIndex++;
             }
 
-            Log($"Sector count: {sectorList.Count()}");
+            
+
+            Log($"Sector count: {sectorTuples.Count()}");
 
             //  Returns the first sector if flight doesn't leave FIR
-            if (sectorNames.Count == 1 && sectorNames[0] == "LJLA") { return sectorList[0]; }
+            if (sectorTuples.Count == 1 && sectorTuples[0].Item1 == "LJLA") { return sectorTuples[0]; }
 
             //  Returns if traffic is departing or arriving into FIR
-            if (sectorNames.Count == 2 && sectorNames[0] != sectorNames[1] ) { return sectorList[1]; }
+            if (sectorTuples.Count == 2 && sectorTuples[0].Item1 != sectorTuples[1].Item1) { return sectorTuples[1]; } /*&& 
+                (sectorTuples[0].Item1 == "LJLA" || sectorTuples[1].Item1 == "LJLA")*/
 
-            if (sectorNames.Count > 2)
+            if (sectorTuples.Count > 2)
             {
+                //Log("IN HERE");
                 int i = 0;
-                while (sectorNames[i] == sectorNames[i+1])
+
+                while (sectorTuples[i].Item1 == sectorTuples[i+1].Item1)
                 {
                     i++;
+                    if (sectorTuples[i].Item1 != sectorTuples[i+1].Item1) { break; }
                     continue;
                 }
-                return new Tuple<string, int>(sectorNames[i+1], outboundIndex);
+                outboundIndex = i;
+                //Log("HERE");
+                return new Tuple<string, int>(sectorTuples[i].Item1, outboundIndex);
             }
-
             return new Tuple<string, int>("LJLA", 0);
         }
 
         private List<string> ApplySectors(Flight flight)
         {
-            string outboundSector = string.Empty;
-            string inboundSector  = string.Empty;
             List<string> appliedSectors = new List<string>();
+            
+            Tuple<string, int> outTuple = ApplyOutboundSector(flight);
+            Tuple<string, int> inTuple = ApplyInboundSector(flight);
 
-            int outboundSegmentIndex = 0;
-            int inboundSegmentIndex = 0;
-
-            // Determine outbound sector / previous sector
-            foreach (var segment in flight.Route)
+            if (outTuple.Item2 < inTuple.Item2)
             {
-                foreach (Sector sect in sectors)
-                {
-                    if (IntersectsSector(segment, sect))
-                    {
-                        outboundSector = sect.Name;
-                        break;
-                    }
-                }
-                outboundSegmentIndex++;
-            }
-
-            // Determine inbound sector / next sector
-            Tuple<string, int> inboundSectTuple = ApplyInboundSector(flight);
-            inboundSector = inboundSectTuple.Item1;
-            inboundSegmentIndex = inboundSectTuple.Item2;
-
-            if (inboundSegmentIndex > outboundSegmentIndex)
-            {
-                appliedSectors.Add(inboundSector);
-                appliedSectors.Add(outboundSector);
-                return appliedSectors;
+                appliedSectors.Add(inTuple.Item1);
+                appliedSectors.Add(outTuple.Item1);
+                Log("SWAPPED");
             }
             else
             {
-                appliedSectors.Add(outboundSector);
-                appliedSectors.Add(inboundSector);
+                appliedSectors.Add(outTuple.Item1);
+                appliedSectors.Add(inTuple.Item1);
+                Log("NOT swapped");
             }
 
             return appliedSectors;
@@ -606,7 +596,6 @@ namespace eStrips
 
                     flight.Loa_efls = ApplyEFLLoA(flight);
                     flight.Loa_xfls = ApplyXFLLoA(flight);
-                    //Log($"LOA XFL: {flight.AppliedXFL}");
 
                     double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
                     flight.ComputedFL = ((int)Math.Round(tempCFL / 10)) * 10;
@@ -681,7 +670,7 @@ namespace eStrips
                 else { continue; }
 
             }
-            //Log("===========================================");
+            Log("===========================================");
         }
 
         private List<Line> ProcessRoute(Flight flight)
