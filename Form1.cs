@@ -461,7 +461,7 @@ namespace eStrips
 
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
-        private Tuple<string, int> ApplyOutboundSector(Flight flight)
+        private Tuple<string, int> DefineInSector(Flight flight)
         {
             // Determine outbound sector / previous sector
             string outboundSector = string.Empty;
@@ -484,7 +484,7 @@ namespace eStrips
         }
 
         // Applies the sector the flight will be entering
-        private Tuple<string, int> ApplyInboundSector(Flight flight)    
+        private Tuple<string, int> DefineOutSector(Flight flight)    
         {
             List<Tuple<string, int>> sectorTuples = new List<Tuple<string, int>>();
             List<string> sectorNames = new List<string>();
@@ -503,8 +503,6 @@ namespace eStrips
                     else { continue; }
                 }
             }
-
-            
 
             Log($"Sector count: {sectorTuples.Count()}");
 
@@ -533,27 +531,21 @@ namespace eStrips
             return new Tuple<string, int>("LJLA", 0);
         }
 
-        private List<string> ApplySectors(Flight flight)
-        {
-            List<string> appliedSectors = new List<string>();
-            
-            Tuple<string, int> outTuple = ApplyOutboundSector(flight);
-            Tuple<string, int> inTuple = ApplyInboundSector(flight);
+        private Tuple<string, string> ApplySectors(Flight flight)
+        {   
+            Tuple<string, int> outTuple = DefineInSector(flight);
+            Tuple<string, int> inTuple = DefineOutSector(flight);
 
             if (outTuple.Item2 < inTuple.Item2)
             {
-                appliedSectors.Add(inTuple.Item1);
-                appliedSectors.Add(outTuple.Item1);
                 Log("SWAPPED");
+                return new Tuple<string, string>(inTuple.Item1, outTuple.Item1);
             }
             else
             {
-                appliedSectors.Add(outTuple.Item1);
-                appliedSectors.Add(inTuple.Item1);
                 Log("NOT swapped");
+                return new Tuple<string, string>(outTuple.Item1, inTuple.Item1);
             }
-
-            return appliedSectors;
         }
 
         private int GetQNH(string station)
@@ -586,12 +578,10 @@ namespace eStrips
                 if (IntersectsSector(line, mainSector))
                 {
                     Log(flight.Callsign + " has intersection");
+                    Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
-                    /*flight.OutboundSector = ApplyOutboundSector(flight);
-                    flight.InboundSector = ApplyInboundSector(flight);*/
-
-                    flight.OutboundSector = ApplySectors(flight)[0];
-                    flight.InboundSector = ApplySectors(flight)[1];
+                    flight.OutboundSector = AppliedSectors.Item1;
+                    flight.InboundSector = AppliedSectors.Item2;
                     Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector + "\n");
 
                     flight.Loa_efls = ApplyEFLLoA(flight);
