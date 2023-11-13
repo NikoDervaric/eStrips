@@ -479,7 +479,6 @@ namespace eStrips
                     }
                 }
             }
-            Log($"OUT index: {outboundSegmentIndex}");
             return new Tuple<string, int>("LJLA", 0);
         }
 
@@ -488,7 +487,6 @@ namespace eStrips
         {
             List<Tuple<string, int>> sectorTuples = new List<Tuple<string, int>>();
             List<string> sectorNames = new List<string>();
-            int outboundIndex = 0;
 
             //Add all sectors that have an intersecting segment.
             for (int i = 0; i < flight.Route.Count; i++)
@@ -513,36 +511,28 @@ namespace eStrips
                 .Select(group => group.Last())
                 .ToList();
 
-            //  Testing only
-            foreach (var tuple in uniqueSectorTuples)
-            {
-                Log("Sector: " + tuple.Item1 + " | Index: " + tuple.Item2);
-
-            }
-
-            Log($"Sector count: {uniqueSectorTuples.Count()}");
-
             //  Returns the first sector if flight doesn't leave FIR
-            if (uniqueSectorTuples.Count == 1 && uniqueSectorTuples[0].Item1 == "LJLA") { return sectorTuples[0]; }
+            if (uniqueSectorTuples.Count == 1 && uniqueSectorTuples[0].Item1 == "LJLA") { return uniqueSectorTuples[0]; }
 
-            //  Returns if traffic is departing or arriving into FIR
-            if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1) { return uniqueSectorTuples[1]; } /*&& 
-                (sectorTuples[0].Item1 == "LJLA" || sectorTuples[1].Item1 == "LJLA")*/
+            //  Returns if traffic is departing or arriving into main FIR
+            if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1 && (uniqueSectorTuples[0].Item1 == "LJLA" || uniqueSectorTuples[1].Item1 == "LJLA")) 
+            {
+                return uniqueSectorTuples[1]; 
+            }
 
             if (uniqueSectorTuples.Count > 2)
             {
-                //Log("IN HERE");
                 int i = 0;
 
                 while (uniqueSectorTuples[i].Item1 == uniqueSectorTuples[i+1].Item1)
                 {
                     i++;
-                    if (uniqueSectorTuples[i].Item1 != uniqueSectorTuples[i+1].Item1) { break; }
-                    continue;
+                    if (i + 1 >= uniqueSectorTuples.Count || uniqueSectorTuples[i].Item1 != uniqueSectorTuples[i + 1].Item1)
+                    {
+                        break;
+                    }
                 }
-                outboundIndex = i;
-                //Log("HERE");
-                return new Tuple<string, int>(uniqueSectorTuples[i].Item1, outboundIndex);
+                return new Tuple<string, int>(uniqueSectorTuples[i].Item1, i);
             }
             return new Tuple<string, int>("LJLA", 0);
         }
@@ -593,14 +583,14 @@ namespace eStrips
             {
                 if (IntersectsSector(line, mainSector))
                 {
-                    Log(flight.Callsign + " has intersection");
                     Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
-                    flight.OutboundSector = AppliedSectors.Item1;
-                    flight.InboundSector = AppliedSectors.Item2;
-                    Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector + "\n");
+                    Log(flight.Callsign);
+                    flight.InboundSector = AppliedSectors.Item1;
+                    flight.OutboundSector = AppliedSectors.Item2;
+                    Log("From (O): " + flight.InboundSector + " | To (I): " + flight.OutboundSector);
 
-                    flight.Loa_efls = ApplyEFLLoA(flight);
+                    //flight.Loa_efls = ApplyEFLLoA(flight);
                     flight.Loa_xfls = ApplyXFLLoA(flight);
 
                     double tempCFL = (flight.Altitude + (1013 - GetQNH("LJLJ")) * 28) / 100;
@@ -620,10 +610,9 @@ namespace eStrips
             string[] trafficInRange = radarResponse.Split(';');
             trafficInRange = trafficInRange.Skip(1).ToArray();
 
-            //Log("=====ValidateFlights()=====");
+            Log("=====ValidateFlights()=====");
             foreach (string traffic in trafficInRange)
             {
-
                 string fplTmp = SendCommand($"#FP;{traffic}");
                 string[] fpl = fplTmp.Split(';');
 
@@ -746,20 +735,20 @@ namespace eStrips
 
             if (ExitLevels.ContainsKey(DKey_ADEP)) 
             {
-                Log(DKey_ADEP);
+                Log(DKey_ADEP); //
                 loa_xfls.Add(ExitLevels[DKey_ADEP]);
             }
 
             if(ExitLevels.ContainsKey(AKey_ADES))
             {
-                Log(AKey_ADES);
+                Log(AKey_ADES); //GOOD
                 loa_xfls.Add(ExitLevels[AKey_ADES]);
             }
 
             return loa_xfls;
         }
 
-        //CLOSING
+        //
         private void EStrips_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Stop the timer

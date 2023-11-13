@@ -48,7 +48,7 @@ namespace eStrips
             else { AppliedEFL = ComputedFL; }
 
             AppliedXFL = ApplyXFL();
-            AppliedEFL = ApplyEFL();
+            //AppliedEFL = ApplyEFL();
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
                                     $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
@@ -66,6 +66,7 @@ namespace eStrips
             // If XFL is greater than cruise altitude, the XFL will be set to cruise alt
             if (AppliedXFL > Flightplan.CruiseAlt) { AppliedXFL = Flightplan.CruiseAlt; }
 
+            //Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | COUNT:" + Loa_xfls.Count);
             for (int i = 0; i < Loa_xfls.Count;)
             {
                 Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | " + Loa_xfls[i]);
