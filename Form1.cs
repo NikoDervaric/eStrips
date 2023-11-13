@@ -497,36 +497,52 @@ namespace eStrips
                 {
                     if (IntersectsSector(flight.Route[i], sect) && !sectorNames.Contains(sect.Name))
                     {
-                        Log("Sector: " +  sect.Name + " | Index: " + i);
                         sectorTuples.Add(new Tuple<string, int>(sect.Name, i));
                     }
                     else { continue; }
                 }
             }
 
-            Log($"Sector count: {sectorTuples.Count()}");
+            /*
+               Remove duplicates based on the sector name.
+               - Group the tuples by the sector name.
+               - Select the first tuple from each group (keeps the first occurrence).
+               - Convert the result to a list.
+            */      
+            List<Tuple<string, int>> uniqueSectorTuples = sectorTuples.GroupBy(tuple => tuple.Item1)
+                .Select(group => group.Last())
+                .ToList();
+
+            //  Testing only
+            foreach (var tuple in uniqueSectorTuples)
+            {
+                Log("Sector: " + tuple.Item1 + " | Index: " + tuple.Item2);
+
+            }
+
+            Log($"Sector count: {uniqueSectorTuples.Count()}");
 
             //  Returns the first sector if flight doesn't leave FIR
-            if (sectorTuples.Count == 1 && sectorTuples[0].Item1 == "LJLA") { return sectorTuples[0]; }
+            if (uniqueSectorTuples.Count == 1 && uniqueSectorTuples[0].Item1 == "LJLA") { return sectorTuples[0]; }
 
             //  Returns if traffic is departing or arriving into FIR
-            if (sectorTuples.Count == 2 && sectorTuples[0].Item1 != sectorTuples[1].Item1) { return sectorTuples[1]; } /*&& 
+            if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1) { return uniqueSectorTuples[1]; } /*&& 
                 (sectorTuples[0].Item1 == "LJLA" || sectorTuples[1].Item1 == "LJLA")*/
 
-            if (sectorTuples.Count > 2)
+            if (uniqueSectorTuples.Count > 2)
             {
                 //Log("IN HERE");
                 int i = 0;
 
-                while (sectorTuples[i].Item1 == sectorTuples[i+1].Item1)
+                while (uniqueSectorTuples[i].Item1 == uniqueSectorTuples[i+1].Item1)
                 {
                     i++;
-                    if (sectorTuples[i].Item1 != sectorTuples[i+1].Item1) { break; }
+                    if (uniqueSectorTuples[i].Item1 != uniqueSectorTuples[i+1].Item1) { break; }
                     continue;
                 }
                 outboundIndex = i;
                 //Log("HERE");
-                return new Tuple<string, int>(sectorTuples[i].Item1, outboundIndex);
+                return new Tuple<string, int>(uniqueSectorTuples[i].Item1, outboundIndex);
             }
             return new Tuple<string, int>("LJLA", 0);
         }
@@ -536,7 +552,7 @@ namespace eStrips
             Tuple<string, int> outTuple = DefineInSector(flight);
             Tuple<string, int> inTuple = DefineOutSector(flight);
 
-            if (outTuple.Item2 < inTuple.Item2)
+            if (outTuple.Item2 > inTuple.Item2)
             {
                 Log("SWAPPED");
                 return new Tuple<string, string>(inTuple.Item1, outTuple.Item1);
