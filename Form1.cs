@@ -105,7 +105,15 @@ namespace eStrips
         //  LOGGING
         private static void Log(string str)
         {
-            Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | " + str);
+            if (File.Exists($"{cwd}/log.txt")) { File.Delete($"{cwd}/log.txt"); }
+            else { File.Create($"{cwd}/log.txt"); }
+
+            Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + str);
+            using (StreamWriter sw = File.AppendText($"{cwd}/log.txt"))
+            {
+                // Write the log message to the file
+                sw.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + str);
+            }
         }
         
         // TIMING AND BASIC PROGRAM FUNCTIONALITY
@@ -459,6 +467,31 @@ namespace eStrips
             }
         }
 
+        private List<Line> SplitRouteLines(List<Line> lines)
+        {
+            List<Line> splitLines = new List<Line>();
+
+            foreach (var line in lines)
+            {
+                for (int i = 0; i <= lines.Count(); i++)
+                {
+                    double ratio = i / 10.0;
+                    double x = line.Start.X + ratio * (line.End.X - line.Start.X);
+                    double y = line.Start.Y + ratio * (line.End.Y - line.Start.Y);
+
+                    Point splitPoint = new Point(x, y);
+
+                    // Create a new Line with the current split point and the next one
+                    Line splitLine = new Line(splitPoint, line.End);
+                    splitLines.Add(splitLine);
+
+                    // Update the start point for the next iteration
+                    line.Start = splitPoint;
+                }
+            }
+
+            return splitLines;
+        }
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
         private Tuple<string, int> DefineInSector(Flight flight)
@@ -467,14 +500,17 @@ namespace eStrips
             string outboundSector = string.Empty;
             int outboundSegmentIndex = 0;
 
-            for (int i = 0; i < flight.Route.Count; i++)
+            List<Line> flightRoute = SplitRouteLines(flight.Route);
+
+            for (int i = 0; i < flightRoute.Count; i++)
             {
                 foreach (Sector sect in sectors)
                 {
-                    if (IntersectsSector(flight.Route[i], sect))
+                    if (IntersectsSector(flightRoute[i], sect) && sect.Name != "LJLA")
                     {
                         outboundSector = sect.Name;
                         outboundSegmentIndex = i;
+                        Log($"{outboundSector} | Ind: {i}");
                         return new Tuple<string, int>(outboundSector, i);
                     }
                 }
@@ -487,13 +523,14 @@ namespace eStrips
         {
             List<Tuple<string, int>> sectorTuples = new List<Tuple<string, int>>();
             List<string> sectorNames = new List<string>();
+            List<Line> flightRoute = SplitRouteLines(flight.Route);
 
             //Add all sectors that have an intersecting segment.
-            for (int i = 0; i < flight.Route.Count; i++)
+            for (int i = 0; i < flightRoute.Count; i++)
             {
                 foreach (Sector sect in sectors)
                 {
-                    if (IntersectsSector(flight.Route[i], sect) && !sectorNames.Contains(sect.Name))
+                    if (IntersectsSector(flightRoute[i], sect) && !sectorNames.Contains(sect.Name))
                     {
                         sectorTuples.Add(new Tuple<string, int>(sect.Name, i));
                     }
@@ -517,6 +554,7 @@ namespace eStrips
             //  Returns if traffic is departing or arriving into main FIR
             if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1 && (uniqueSectorTuples[0].Item1 == "LJLA" || uniqueSectorTuples[1].Item1 == "LJLA")) 
             {
+                Log($"SECTOR: {uniqueSectorTuples[1]}");
                 return uniqueSectorTuples[1]; 
             }
 
@@ -532,8 +570,11 @@ namespace eStrips
                         break;
                     }
                 }
+                Log($"{uniqueSectorTuples[i].Item1} | Ind: {i}");
                 return new Tuple<string, int>(uniqueSectorTuples[i].Item1, i);
             }
+
+            Log($"welp...");
             return new Tuple<string, int>("LJLA", 0);
         }
 
@@ -544,12 +585,12 @@ namespace eStrips
 
             if (outTuple.Item2 > inTuple.Item2)
             {
-                Log("SWAPPED");
+                //Log("SWAPPED");
                 return new Tuple<string, string>(inTuple.Item1, outTuple.Item1);
             }
             else
             {
-                Log("NOT swapped");
+                //Log("NOT swapped");
                 return new Tuple<string, string>(outTuple.Item1, inTuple.Item1);
             }
         }
@@ -586,9 +627,9 @@ namespace eStrips
                     Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
                     Log(flight.Callsign);
-                    flight.InboundSector = AppliedSectors.Item1;
-                    flight.OutboundSector = AppliedSectors.Item2;
-                    Log("From (O): " + flight.InboundSector + " | To (I): " + flight.OutboundSector);
+                    flight.OutboundSector = AppliedSectors.Item1;
+                    flight.InboundSector = AppliedSectors.Item2;
+                    Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
 
                     //flight.Loa_efls = ApplyEFLLoA(flight);
                     flight.Loa_xfls = ApplyXFLLoA(flight);
@@ -730,12 +771,12 @@ namespace eStrips
             string ADEP = flight.Flightplan.Adep;
             string ADES = flight.Flightplan.Ades;
 
-            string DKey_ADEP = 'D' + ADEP + flight.InboundSector;
-            string AKey_ADES = 'A' + ADES + flight.InboundSector;
+            string DKey_ADEP = 'D' + ADEP + flight.OutboundSector;
+            string AKey_ADES = 'A' + ADES + flight.OutboundSector;
 
             if (ExitLevels.ContainsKey(DKey_ADEP)) 
             {
-                Log(DKey_ADEP); //
+                //Log(DKey_ADEP); //
                 loa_xfls.Add(ExitLevels[DKey_ADEP]);
             }
 

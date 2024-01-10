@@ -67,10 +67,11 @@ namespace eStrips
             if (AppliedXFL > Flightplan.CruiseAlt) { AppliedXFL = Flightplan.CruiseAlt; }
 
             //Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | COUNT:" + Loa_xfls.Count);
-            for (int i = 0; i < Loa_xfls.Count;)
+            for (int i = 0; i < Loa_xfls.Count;i++)
             {
-                Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | " + Loa_xfls[i]);
+                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + Loa_xfls[i]);
                 if (Loa_xfls[i] < AppliedXFL) { AppliedXFL = Loa_xfls[i]; }
+                else { AppliedXFL = ComputedFL; break; }
             }
 
             //  TODO!
