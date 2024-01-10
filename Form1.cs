@@ -492,6 +492,7 @@ namespace eStrips
 
             return splitLines;
         }
+        
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
         private Tuple<string, int> DefineInSector(Flight flight)
@@ -511,7 +512,7 @@ namespace eStrips
                         outboundSector = sect.Name;
                         outboundSegmentIndex = i;
                         Log($"{outboundSector} | Ind: {i}");
-                        return new Tuple<string, int>(outboundSector, i);
+                        return new Tuple<string, int>(outboundSector, 0);
                     }
                 }
             }
@@ -555,7 +556,7 @@ namespace eStrips
             if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1 && (uniqueSectorTuples[0].Item1 == "LJLA" || uniqueSectorTuples[1].Item1 == "LJLA")) 
             {
                 Log($"SECTOR: {uniqueSectorTuples[1]}");
-                return uniqueSectorTuples[1]; 
+                return uniqueSectorTuples[1];
             }
 
             if (uniqueSectorTuples.Count > 2)
@@ -573,7 +574,6 @@ namespace eStrips
                 Log($"{uniqueSectorTuples[i].Item1} | Ind: {i}");
                 return new Tuple<string, int>(uniqueSectorTuples[i].Item1, i);
             }
-
             Log($"welp...");
             return new Tuple<string, int>("LJLA", 0);
         }
