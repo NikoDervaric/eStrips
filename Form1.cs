@@ -47,9 +47,9 @@ namespace eStrips
 
             mainSector = LoadMainSector();
             Airac = LoadAirac();
-            Log("Loaded AIRAC");
+            Logging.Log("Loaded AIRAC");
             LoadLoAs();
-            Log("Loaded LoAs");
+            Logging.Log("Loaded LoAs");
             sectors = LoadSectors();
 
             StyleStripTable();
@@ -100,20 +100,6 @@ namespace eStrips
 
             stripDataTable.Columns["planned_cleared_levels_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
             stripDataTable.Columns["xfl_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
-        }
-
-        //  LOGGING
-        private static void Log(string str)
-        {
-            if (File.Exists($"{cwd}/log.txt")) { File.Delete($"{cwd}/log.txt"); }
-            else { File.Create($"{cwd}/log.txt"); }
-
-            Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + str);
-            using (StreamWriter sw = File.AppendText($"{cwd}/log.txt"))
-            {
-                // Write the log message to the file
-                sw.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + str);
-            }
         }
         
         // TIMING AND BASIC PROGRAM FUNCTIONALITY
@@ -167,7 +153,7 @@ namespace eStrips
                 string[] squawk = SendCommand($"#TRSQK;{callsign.Value}").Split(';');
                 if (squawk[2] == "Traffic not assumed.") 
                 {
-                    Log("Here:" + callsign.Value.ToString());
+                    Logging.Log("Here:" + callsign.Value.ToString());
                     pssr.Value = ""; 
                 }
                 else
@@ -179,8 +165,8 @@ namespace eStrips
             else if (e.ColumnIndex == 0)
             {
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
-                
-                Log("Callsing: " + callsign.Value.ToString());
+
+                Logging.Log("Callsing: " + callsign.Value.ToString());
                 FlightHandler form = new FlightHandler(callsign.Value.ToString());
                 form.Show();
             }
@@ -241,7 +227,7 @@ namespace eStrips
                     throw new FormatException("Invalid coordinate format in file.");
                 }
             }
-            Log($"Loaded {filePath[0]}");
+            Logging.Log($"Loaded {filePath[0]}");
             return sector;
         }
 
@@ -272,7 +258,7 @@ namespace eStrips
                 }
 
                 sectors.Add(newSect);
-                Log($"Loaded sector: {fileName}");
+                Logging.Log($"Loaded sector: {fileName}");
             }
 
             return sectors;
@@ -292,12 +278,12 @@ namespace eStrips
                 if (parts[0] == "XFL")
                 {
                     ExitLevels.Add(key, loaFL);
-                    Log($"Loaded: {key}");
+                    Logging.Log($"Loaded: {key}");
                 }
                 else if (parts[0] == "EFL")
                 {
                     EntryLevels.Add(key, loaFL);
-                    Log($"Loaded: {key}");
+                    Logging.Log($"Loaded: {key}");
                 }
                 else { continue; }
             }
@@ -511,7 +497,7 @@ namespace eStrips
                     {
                         outboundSector = sect.Name;
                         outboundSegmentIndex = i;
-                        Log($"{outboundSector} | Ind: {i}");
+                        Logging.Log($"{outboundSector} | Ind: {i}");
                         return new Tuple<string, int>(outboundSector, 0);
                     }
                 }
@@ -555,7 +541,7 @@ namespace eStrips
             //  Returns if traffic is departing or arriving into main FIR
             if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1 && (uniqueSectorTuples[0].Item1 == "LJLA" || uniqueSectorTuples[1].Item1 == "LJLA")) 
             {
-                Log($"SECTOR: {uniqueSectorTuples[1]}");
+                Logging.Log($"SECTOR: {uniqueSectorTuples[1]}");
                 return uniqueSectorTuples[1];
             }
 
@@ -571,10 +557,10 @@ namespace eStrips
                         break;
                     }
                 }
-                Log($"{uniqueSectorTuples[i].Item1} | Ind: {i}");
+                Logging.Log($"{uniqueSectorTuples[i].Item1} | Ind: {i}");
                 return new Tuple<string, int>(uniqueSectorTuples[i].Item1, i);
             }
-            Log($"welp...");
+            Logging.Log($"welp...");
             return new Tuple<string, int>("LJLA", 0);
         }
 
@@ -626,10 +612,10 @@ namespace eStrips
                 {
                     Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
-                    Log(flight.Callsign);
+                    Logging.Log(flight.Callsign);
                     flight.OutboundSector = AppliedSectors.Item1;
                     flight.InboundSector = AppliedSectors.Item2;
-                    Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
+                    Logging.Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
 
                     //flight.Loa_efls = ApplyEFLLoA(flight);
                     flight.Loa_xfls = ApplyXFLLoA(flight);
@@ -651,7 +637,7 @@ namespace eStrips
             string[] trafficInRange = radarResponse.Split(';');
             trafficInRange = trafficInRange.Skip(1).ToArray();
 
-            Log("=====ValidateFlights()=====");
+            Logging.Log("=====ValidateFlights()=====");
             foreach (string traffic in trafficInRange)
             {
                 string fplTmp = SendCommand($"#FP;{traffic}");
@@ -706,7 +692,7 @@ namespace eStrips
                 else { continue; }
 
             }
-            Log("===========================================");
+            Logging.Log("===========================================");
         }
 
         private List<Line> ProcessRoute(Flight flight)
@@ -782,7 +768,7 @@ namespace eStrips
 
             if(ExitLevels.ContainsKey(AKey_ADES))
             {
-                Log(AKey_ADES); //GOOD
+                Logging.Log(AKey_ADES); //GOOD
                 loa_xfls.Add(ExitLevels[AKey_ADES]);
             }
 
