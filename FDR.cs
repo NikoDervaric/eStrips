@@ -31,7 +31,7 @@ namespace eStrips
         {
             Flight flight = eStrips.validFlights[callsign];
 
-            if (flight.Route == null) { return; }
+            if (flight.SystemRoute == null) { return; }
             LblCallsign.Text = callsign;
             FdrAC.Text = flight.Flightplan.AcType;
             FdrWtc.Text = flight.Flightplan.Wtc;

@@ -21,7 +21,7 @@ namespace eStrips
         private System.Timers.Timer timer;
         private const string serverAddress = "127.0.0.1";           // Replace with your server IP address
         private static int serverPort = int.Parse(portFile[0]);     // Replace with your server port number
-        private const int sendInterval = 15000;                      // Interval between sending messages (in milliseconds)
+        public static int sendInterval = 15000;                     // Interval between sending messages (in milliseconds)
 
         public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
         private readonly Dictionary<string, Point> Airac;
@@ -83,8 +83,10 @@ namespace eStrips
             stripDataTable.Columns["planned_cleared_levels_column"].DefaultCellStyle.Font = new Font("Segoe UI Semibold", 23, GraphicsUnit.Pixel);
             stripDataTable.Columns["xfl_column"].DefaultCellStyle.Font = new Font("Segoe UI Semibold", 23, GraphicsUnit.Pixel);
 
-            DataGridViewCellStyle headerStyle = new DataGridViewCellStyle();
-            headerStyle.Font = new Font("Segoe UI Semibold", 15, FontStyle.Bold);
+            DataGridViewCellStyle headerStyle = new DataGridViewCellStyle
+            {
+                Font = new Font("Segoe UI Semibold", 15, FontStyle.Bold)
+            };
             stripDataTable.Columns[4].HeaderCell.Style = headerStyle;
 
             stripDataTable.Columns["planned_cleared_levels_column"].DefaultCellStyle.BackColor = Color.FromArgb(255, 255, 230, 80);
@@ -101,7 +103,7 @@ namespace eStrips
             stripDataTable.Columns["planned_cleared_levels_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
             stripDataTable.Columns["xfl_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
         }
-        
+
         // TIMING AND BASIC PROGRAM FUNCTIONALITY
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
@@ -453,41 +455,59 @@ namespace eStrips
             }
         }
 
-        private List<Line> SplitRouteLines(List<Line> lines)
+        //NEW
+        static List<Line> SplitLines(List<Line> inputLines)
         {
-            List<Line> splitLines = new List<Line>();
+            List<Line> outputLines = new List<Line>();
 
-            foreach (var line in lines)
+            foreach (Line line in inputLines)
             {
-                for (int i = 0; i <= lines.Count(); i++)
+                // Splitting the line into 10 parts
+                List<Line> parts = SplitLine(line, 2);
+
+                // Converting each part into a string representation and adding to the output list
+                foreach (var part in parts)
                 {
-                    double ratio = i / 10.0;
-                    double x = line.Start.X + ratio * (line.End.X - line.Start.X);
-                    double y = line.Start.Y + ratio * (line.End.Y - line.Start.Y);
-
-                    Point splitPoint = new Point(x, y);
-
-                    // Create a new Line with the current split point and the next one
-                    Line splitLine = new Line(splitPoint, line.End);
-                    splitLines.Add(splitLine);
-
-                    // Update the start point for the next iteration
-                    line.Start = splitPoint;
+                    outputLines.Add(new Line(new Point(part.Start.X, part.Start.Y), new Point(part.End.X, part.End.Y)));
                 }
             }
 
-            return splitLines;
+            return outputLines;
         }
-        
+
+        //NEW
+        static List<Line> SplitLine(Line line, int parts)
+        {
+            double startX = line.Start.X;
+            double startY = line.Start.Y;
+            double endX = line.End.X;
+            double endY = line.End.Y;
+
+            double xIncrement = (endX - startX) / parts;
+            double yIncrement = (endY - startY) / parts;
+
+            List<Line> splittedLines = new List<Line>();
+
+            for (int i = 0; i < parts; i++)
+            {
+                double newStartX = startX + (xIncrement * i);
+                double newStartY = startY + (yIncrement * i);
+                double newEndX = startX + (xIncrement * (i + 1));
+                double newEndY = startY + (yIncrement * (i + 1));
+
+                splittedLines.Add(new Line(new Point(newStartX, newStartY), new Point(newEndX, newEndY)));
+            }
+
+            return splittedLines;
+        }
+
+
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
-        private Tuple<string, int> DefineInSector(Flight flight)
+        private string DefineInSector(Flight flight)
         {
-            // Determine outbound sector / previous sector
-            string outboundSector = string.Empty;
-            int outboundSegmentIndex = 0;
-
-            List<Line> flightRoute = SplitRouteLines(flight.Route);
+            // Determine outbound sector / previous
+            List<Line> flightRoute = SplitLines(flight.SystemRoute);
 
             for (int i = 0; i < flightRoute.Count; i++)
             {
@@ -495,90 +515,56 @@ namespace eStrips
                 {
                     if (IntersectsSector(flightRoute[i], sect) && sect.Name != "LJLA")
                     {
-                        outboundSector = sect.Name;
-                        outboundSegmentIndex = i;
-                        Logging.Log($"{outboundSector} | Ind: {i}");
-                        return new Tuple<string, int>(outboundSector, 0);
+                        // Returns first sector the route intersects
+                        //Logging.Log($"{sect.Name}");
+                        flight.InboundSector = sect.Name;
+                        return sect.Name;
                     }
                 }
             }
-            return new Tuple<string, int>("LJLA", 0);
+            return mainSector.Name;
         }
 
         // Applies the sector the flight will be entering
-        private Tuple<string, int> DefineOutSector(Flight flight)    
+        private List<string> DefineOutSector(Flight flight, string inSector)
         {
-            List<Tuple<string, int>> sectorTuples = new List<Tuple<string, int>>();
-            List<string> sectorNames = new List<string>();
-            List<Line> flightRoute = SplitRouteLines(flight.Route);
+            //int firstSectorIndex = 0;
+            //int lastSectorIndex = 0;
+            List<string> crossingSectors = new List<string>();
+            List<Line> flightRoute = SplitLines(flight.SystemRoute);
 
-            //Add all sectors that have an intersecting segment.
-            for (int i = 0; i < flightRoute.Count; i++)
+            foreach (Sector sect in sectors)
             {
-                foreach (Sector sect in sectors)
+                for (int i = 0; i < flightRoute.Count; i++)
                 {
-                    if (IntersectsSector(flightRoute[i], sect) && !sectorNames.Contains(sect.Name))
+                    //Logging.Log(flightRoute[i].ToString());
+                    if (IntersectsSector(flightRoute[i], sect) && !crossingSectors.Contains(sect.Name) && sect.Name != inSector)
                     {
-                        sectorTuples.Add(new Tuple<string, int>(sect.Name, i));
+                        crossingSectors.Add($"{sect.Name}");
                     }
-                    else { continue; }
-                }
-            }
-
-            /*
-               Remove duplicates based on the sector name.
-               - Group the tuples by the sector name.
-               - Select the first tuple from each group (keeps the first occurrence).
-               - Convert the result to a list.
-            */      
-            List<Tuple<string, int>> uniqueSectorTuples = sectorTuples.GroupBy(tuple => tuple.Item1)
-                .Select(group => group.Last())
-                .ToList();
-
-            //  Returns the first sector if flight doesn't leave FIR
-            if (uniqueSectorTuples.Count == 1 && uniqueSectorTuples[0].Item1 == "LJLA") { return uniqueSectorTuples[0]; }
-
-            //  Returns if traffic is departing or arriving into main FIR
-            if (uniqueSectorTuples.Count == 2 && uniqueSectorTuples[0].Item1 != uniqueSectorTuples[1].Item1 && (uniqueSectorTuples[0].Item1 == "LJLA" || uniqueSectorTuples[1].Item1 == "LJLA")) 
-            {
-                Logging.Log($"SECTOR: {uniqueSectorTuples[1]}");
-                return uniqueSectorTuples[1];
-            }
-
-            if (uniqueSectorTuples.Count > 2)
-            {
-                int i = 0;
-
-                while (uniqueSectorTuples[i].Item1 == uniqueSectorTuples[i+1].Item1)
-                {
-                    i++;
-                    if (i + 1 >= uniqueSectorTuples.Count || uniqueSectorTuples[i].Item1 != uniqueSectorTuples[i + 1].Item1)
+                    else
                     {
-                        break;
+                        continue;
                     }
                 }
-                Logging.Log($"{uniqueSectorTuples[i].Item1} | Ind: {i}");
-                return new Tuple<string, int>(uniqueSectorTuples[i].Item1, i);
             }
-            Logging.Log($"welp...");
-            return new Tuple<string, int>("LJLA", 0);
+
+            if (crossingSectors.Count < 2) { crossingSectors.Add("LJLA"); }
+
+            return crossingSectors;
         }
 
         private Tuple<string, string> ApplySectors(Flight flight)
-        {   
-            Tuple<string, int> outTuple = DefineInSector(flight);
-            Tuple<string, int> inTuple = DefineOutSector(flight);
+        {
+            string inSector = DefineInSector(flight);
+            List<string> outSectorList = DefineOutSector(flight, inSector);
 
-            if (outTuple.Item2 > inTuple.Item2)
+            foreach (string sector in outSectorList)
             {
-                //Log("SWAPPED");
-                return new Tuple<string, string>(inTuple.Item1, outTuple.Item1);
+                Logging.Log($"SectorList: {sector}");
             }
-            else
-            {
-                //Log("NOT swapped");
-                return new Tuple<string, string>(outTuple.Item1, inTuple.Item1);
-            }
+
+            return Tuple.Create(inSector, outSectorList[1]);
         }
 
         private int GetQNH(string station)
@@ -604,18 +590,18 @@ namespace eStrips
         // Applies XFLs and EFLs to validated flights
         private void ApplyLoa(Flight flight)
         {
-            flight.Route = ProcessRoute(flight);
+            flight.SystemRoute = ProcessRoute(flight);
 
-            foreach (Line line in flight.Route)
+            foreach (Line line in flight.SystemRoute)
             {
                 if (IntersectsSector(line, mainSector))
                 {
                     Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
                     Logging.Log(flight.Callsign);
-                    flight.OutboundSector = AppliedSectors.Item1;
-                    flight.InboundSector = AppliedSectors.Item2;
-                    Logging.Log("From (O): " + flight.OutboundSector + " | To (I): " + flight.InboundSector);
+                    flight.InboundSector = AppliedSectors.Item1;
+                    flight.OutboundSector = AppliedSectors.Item2;
+                    //Logging.Log("From (O): " + flight.InboundSector + " | To (I): " + flight.OutboundSector);
 
                     //flight.Loa_efls = ApplyEFLLoA(flight);
                     flight.Loa_xfls = ApplyXFLLoA(flight);

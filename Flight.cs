@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eStrips
 {
@@ -32,7 +28,7 @@ namespace eStrips
         public int ChangedXFL { get; set; }
         public string InboundSector { get; set; }
         public string OutboundSector { get; set; }
-        public List<Line> Route { get; set; }
+        public List<Line> SystemRoute { get; set; }
         public List<Line> FRF { get; set; }
 
         // Functions
@@ -51,31 +47,22 @@ namespace eStrips
             //AppliedEFL = ApplyEFL();
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
-                                    $"                   ", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
+                                    $"{InboundSector} -> {OutboundSector}", $"{WptLbl.Substring(0, 3)}", $"{Flightplan.CruiseAlt}", $"{Flightplan.AcType}", $"{Flightplan.CruiseSpd}", 
                                     $"{Flightplan.Adep}", $"{Flightplan.Ades}", $"{ASSR}", $"{PSSR}", $"{string.Join(" ", Flightplan.Route)}" };
         }
 
         // XFL > Cruise FL = Cruise FL
         // CFL > XFL => XFL = CFL        *Confirm box for XFL
         // Najbolj restriktivnega
-
         public int ApplyXFL()
         {
-            AppliedXFL = ComputedFL;
+            if (Loa_xfls.Count == 0) { AppliedXFL = ComputedFL; }
+            else { AppliedXFL = Loa_xfls.Min(); }
+            //Logging.Log($"XFL = XFL: {AppliedXFL}");
 
             // If XFL is greater than cruise altitude, the XFL will be set to cruise alt
-            if (AppliedXFL > Flightplan.CruiseAlt) { AppliedXFL = Flightplan.CruiseAlt; }
-
-            //Console.WriteLine(DateTime.Now.ToString("h:mm:ss:ff") + " | COUNT:" + Loa_xfls.Count);
-            for (int i = 0; i < Loa_xfls.Count;i++)
-            {
-                Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:ff") + " | " + Loa_xfls[i]);
-                if (Loa_xfls[i] < AppliedXFL) { AppliedXFL = Loa_xfls[i]; }
-                else { AppliedXFL = ComputedFL; break; }
-            }
-
-            //  TODO!
-            //if (ChangedXFL != null) { ChangedXFL = 0; }
+            if (AppliedXFL > Flightplan.CruiseAlt && AppliedXFL != ComputedFL) { AppliedXFL = Flightplan.CruiseAlt; }
+            //Logging.Log($"XFL = RFL: {AppliedXFL}");
 
             return AppliedXFL;
         }
