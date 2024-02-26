@@ -43,7 +43,9 @@ namespace eStrips
             if (int.TryParse(AltLbl, out int CFL) && CFL < Flightplan.CruiseAlt) { AppliedEFL = CFL; }
             else { AppliedEFL = ComputedFL; }
 
+            ChangedXFL = 0;
             AppliedXFL = ApplyXFL();
+            if (ChangedXFL != 0) { AppliedXFL = ChangedXFL; }
             //AppliedEFL = ApplyEFL();
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 

@@ -30,6 +30,10 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(eStrips));
             this.stripDataTable = new System.Windows.Forms.DataGridView();
+            this.BtnMeteo = new System.Windows.Forms.Button();
+            this.BtnLoa = new System.Windows.Forms.Button();
+            this.BtnCharts = new System.Windows.Forms.Button();
+            this.BtnFlights = new System.Windows.Forms.Button();
             this.callsign_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.planned_cleared_levels_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.xfl_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -43,10 +47,6 @@
             this.pssr_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.assr_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.frf_column = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.BtnMeteo = new System.Windows.Forms.Button();
-            this.BtnLoa = new System.Windows.Forms.Button();
-            this.BtnCharts = new System.Windows.Forms.Button();
-            this.BtnFlights = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.stripDataTable)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,6 +54,7 @@
             // 
             this.stripDataTable.AllowUserToAddRows = false;
             this.stripDataTable.AllowUserToDeleteRows = false;
+            this.stripDataTable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.stripDataTable.BackgroundColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.stripDataTable.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.stripDataTable.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Raised;
@@ -72,7 +73,8 @@
             this.pssr_column,
             this.assr_column,
             this.frf_column});
-            this.stripDataTable.Location = new System.Drawing.Point(0, 60);
+            this.stripDataTable.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.stripDataTable.Location = new System.Drawing.Point(0, 59);
             this.stripDataTable.Margin = new System.Windows.Forms.Padding(0);
             this.stripDataTable.MultiSelect = false;
             this.stripDataTable.Name = "stripDataTable";
@@ -84,6 +86,70 @@
             this.stripDataTable.TabIndex = 0;
             this.stripDataTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellClick);
             this.stripDataTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellDoubleClick);
+            // 
+            // BtnMeteo
+            // 
+            this.BtnMeteo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
+            this.BtnMeteo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnMeteo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnMeteo.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnMeteo.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BtnMeteo.Location = new System.Drawing.Point(14, 12);
+            this.BtnMeteo.Margin = new System.Windows.Forms.Padding(5, 3, 3, 3);
+            this.BtnMeteo.Name = "BtnMeteo";
+            this.BtnMeteo.Size = new System.Drawing.Size(120, 35);
+            this.BtnMeteo.TabIndex = 1;
+            this.BtnMeteo.Text = "METEO";
+            this.BtnMeteo.UseVisualStyleBackColor = false;
+            this.BtnMeteo.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnMeteo_MouseClick);
+            // 
+            // BtnLoa
+            // 
+            this.BtnLoa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
+            this.BtnLoa.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnLoa.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnLoa.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnLoa.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BtnLoa.Location = new System.Drawing.Point(147, 12);
+            this.BtnLoa.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
+            this.BtnLoa.Name = "BtnLoa";
+            this.BtnLoa.Size = new System.Drawing.Size(120, 35);
+            this.BtnLoa.TabIndex = 2;
+            this.BtnLoa.Text = "LoA";
+            this.BtnLoa.UseVisualStyleBackColor = false;
+            this.BtnLoa.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnLoa_MouseClick);
+            // 
+            // BtnCharts
+            // 
+            this.BtnCharts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
+            this.BtnCharts.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnCharts.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnCharts.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnCharts.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BtnCharts.Location = new System.Drawing.Point(280, 12);
+            this.BtnCharts.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
+            this.BtnCharts.Name = "BtnCharts";
+            this.BtnCharts.Size = new System.Drawing.Size(120, 35);
+            this.BtnCharts.TabIndex = 3;
+            this.BtnCharts.Text = "CHARTS";
+            this.BtnCharts.UseVisualStyleBackColor = false;
+            this.BtnCharts.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnCharts_MouseClick);
+            // 
+            // BtnFlights
+            // 
+            this.BtnFlights.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
+            this.BtnFlights.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.BtnFlights.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnFlights.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnFlights.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.BtnFlights.Location = new System.Drawing.Point(413, 12);
+            this.BtnFlights.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
+            this.BtnFlights.Name = "BtnFlights";
+            this.BtnFlights.Size = new System.Drawing.Size(120, 35);
+            this.BtnFlights.TabIndex = 4;
+            this.BtnFlights.Text = "FDR";
+            this.BtnFlights.UseVisualStyleBackColor = false;
+            this.BtnFlights.Click += new System.EventHandler(this.BtnFlights_Click);
             // 
             // callsign_column
             // 
@@ -130,7 +196,6 @@
             this.route_column.MinimumWidth = 120;
             this.route_column.Name = "route_column";
             this.route_column.ReadOnly = true;
-            this.route_column.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.route_column.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.route_column.Width = 120;
             // 
@@ -239,74 +304,9 @@
             this.frf_column.MinimumWidth = 200;
             this.frf_column.Name = "frf_column";
             this.frf_column.ReadOnly = true;
-            this.frf_column.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.frf_column.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.frf_column.ToolTipText = "Further route of flight";
             this.frf_column.Width = 200;
-            // 
-            // BtnMeteo
-            // 
-            this.BtnMeteo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
-            this.BtnMeteo.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BtnMeteo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.BtnMeteo.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BtnMeteo.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.BtnMeteo.Location = new System.Drawing.Point(14, 12);
-            this.BtnMeteo.Margin = new System.Windows.Forms.Padding(5, 3, 3, 3);
-            this.BtnMeteo.Name = "BtnMeteo";
-            this.BtnMeteo.Size = new System.Drawing.Size(120, 35);
-            this.BtnMeteo.TabIndex = 1;
-            this.BtnMeteo.Text = "METEO";
-            this.BtnMeteo.UseVisualStyleBackColor = false;
-            this.BtnMeteo.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnMeteo_MouseClick);
-            // 
-            // BtnLoa
-            // 
-            this.BtnLoa.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
-            this.BtnLoa.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BtnLoa.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.BtnLoa.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BtnLoa.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.BtnLoa.Location = new System.Drawing.Point(147, 12);
-            this.BtnLoa.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-            this.BtnLoa.Name = "BtnLoa";
-            this.BtnLoa.Size = new System.Drawing.Size(120, 35);
-            this.BtnLoa.TabIndex = 2;
-            this.BtnLoa.Text = "LoA";
-            this.BtnLoa.UseVisualStyleBackColor = false;
-            this.BtnLoa.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnLoa_MouseClick);
-            // 
-            // BtnCharts
-            // 
-            this.BtnCharts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
-            this.BtnCharts.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BtnCharts.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.BtnCharts.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BtnCharts.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.BtnCharts.Location = new System.Drawing.Point(280, 12);
-            this.BtnCharts.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-            this.BtnCharts.Name = "BtnCharts";
-            this.BtnCharts.Size = new System.Drawing.Size(120, 35);
-            this.BtnCharts.TabIndex = 3;
-            this.BtnCharts.Text = "CHARTS";
-            this.BtnCharts.UseVisualStyleBackColor = false;
-            this.BtnCharts.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BtnCharts_MouseClick);
-            // 
-            // BtnFlights
-            // 
-            this.BtnFlights.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(156)))), ((int)(((byte)(193)))), ((int)(((byte)(202)))));
-            this.BtnFlights.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.BtnFlights.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.BtnFlights.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BtnFlights.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.BtnFlights.Location = new System.Drawing.Point(413, 12);
-            this.BtnFlights.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
-            this.BtnFlights.Name = "BtnFlights";
-            this.BtnFlights.Size = new System.Drawing.Size(120, 35);
-            this.BtnFlights.TabIndex = 4;
-            this.BtnFlights.Text = "FDR";
-            this.BtnFlights.UseVisualStyleBackColor = false;
-            this.BtnFlights.Click += new System.EventHandler(this.BtnFlights_Click);
             // 
             // eStrips
             // 
@@ -321,7 +321,7 @@
             this.Controls.Add(this.BtnMeteo);
             this.Controls.Add(this.stripDataTable);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(1055, 650);
+            this.MinimumSize = new System.Drawing.Size(1055, 692);
             this.Name = "eStrips";
             this.Text = "eStrips - IVAO Slovenia";
             this.Load += new System.EventHandler(this.eStrips_Load);
@@ -333,6 +333,10 @@
         #endregion
 
         private System.Windows.Forms.DataGridView stripDataTable;
+        private System.Windows.Forms.Button BtnMeteo;
+        private System.Windows.Forms.Button BtnLoa;
+        private System.Windows.Forms.Button BtnCharts;
+        private System.Windows.Forms.Button BtnFlights;
         private System.Windows.Forms.DataGridViewTextBoxColumn callsign_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn planned_cleared_levels_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn xfl_column;
@@ -346,10 +350,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn pssr_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn assr_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn frf_column;
-        private System.Windows.Forms.Button BtnMeteo;
-        private System.Windows.Forms.Button BtnLoa;
-        private System.Windows.Forms.Button BtnCharts;
-        private System.Windows.Forms.Button BtnFlights;
     }
 }
 

@@ -168,7 +168,7 @@ namespace eStrips
             {
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
-                Logging.Log("Callsing: " + callsign.Value.ToString());
+                Logging.Log("Callsign: " + callsign.Value.ToString());
                 FlightHandler form = new FlightHandler(callsign.Value.ToString());
                 form.Show();
             }
@@ -501,7 +501,6 @@ namespace eStrips
             return splittedLines;
         }
 
-
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
         private string DefineInSector(Flight flight)
@@ -549,6 +548,13 @@ namespace eStrips
                 }
             }
 
+            if (crossingSectors.Count == 2 && (crossingSectors[0].StartsWith("LD") || crossingSectors[0].StartsWith("LI")) && crossingSectors[1] == "LJLA")
+            {
+                string tmp = crossingSectors[0];
+                crossingSectors[0] = "LJLA";
+                crossingSectors[1] = tmp;
+            }
+
             if (crossingSectors.Count < 2) { crossingSectors.Add("LJLA"); }
 
             return crossingSectors;
@@ -558,11 +564,6 @@ namespace eStrips
         {
             string inSector = DefineInSector(flight);
             List<string> outSectorList = DefineOutSector(flight, inSector);
-
-            foreach (string sector in outSectorList)
-            {
-                Logging.Log($"SectorList: {sector}");
-            }
 
             return Tuple.Create(inSector, outSectorList[1]);
         }
