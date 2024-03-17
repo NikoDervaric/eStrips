@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Timers;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace eStrips
 {
@@ -152,16 +153,26 @@ namespace eStrips
                 DataGridViewTextBoxCell pssr = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex - 10];
 
+                string callsignString = callsign.Value.ToString();
+                Flight tmp = validFlights[callsignString];
+
                 string[] squawk = SendCommand($"#TRSQK;{callsign.Value}").Split(';');
-                if (squawk[2] == "Traffic not assumed.") 
+                if (squawk[2] == "Traffic not assumed.")
                 {
-                    Logging.Log("Here:" + callsign.Value.ToString());
-                    pssr.Value = ""; 
+                    pssr.Value = "";
+                }
+                else if (validFlights[callsignString].PSSR != "" || squawk[2] == "Traffic not assumed.")
+                {
+                    tmp.PSSR = squawk[2];
+                    validFlights.Remove(callsignString);
+                    validFlights.Add(callsignString, tmp);
+                    Logging.Log($"Value: {pssr.Value.GetType()}");
+                    pssr.Value = squawk[2];
+                    SendCommand($"#LBSQK;{callsignString};{squawk[2]}");
                 }
                 else
                 {
-                    pssr.Value = squawk[2];
-                    SendCommand($"#LBSQK;{callsign.Value};{squawk[2]}");
+                    pssr.Value = string.Empty;
                 }
             }
             else if (e.ColumnIndex == 0)
@@ -439,7 +450,19 @@ namespace eStrips
             }
         }
 
-        //TABLE CHECKING AND DATA POPULATION
+        // TABLE CHECKING AND DATA POPULATION
+        private void ApplyFLColors()
+        {
+            foreach (DataGridViewRow row in stripDataTable.Rows)
+            {
+                if (row.Cells["planned_cleared_levels_column"] == row.Cells["xfl_column"]) 
+                {
+                    row.Cells["planned_cleared_levels_column"].Style.BackColor = Color.FromArgb(255, 180, 180, 180);
+                    row.Cells["xfl_column"].Style.BackColor = Color.FromArgb(255, 180, 180, 180);
+                }
+            }
+        }
+
         private void PopulateDataGridView()
         {
             stripDataTable.Rows.Clear();
@@ -453,17 +476,18 @@ namespace eStrips
                 if (exclusionList.Contains(flight.Value.Callsign)) { continue; }
                 stripDataTable.Rows.Add(flight.Value.ShowFlight());
             }
+            ApplyFLColors();
         }
 
-        //NEW
+        // NEW
         static List<Line> SplitLines(List<Line> inputLines)
         {
             List<Line> outputLines = new List<Line>();
 
             foreach (Line line in inputLines)
             {
-                // Splitting the line into 10 parts
-                List<Line> parts = SplitLine(line, 2);
+                // Splitting the line into 5 parts
+                List<Line> parts = SplitRoute(line, 15);
 
                 // Converting each part into a string representation and adding to the output list
                 foreach (var part in parts)
@@ -475,37 +499,29 @@ namespace eStrips
             return outputLines;
         }
 
-        //NEW
-        static List<Line> SplitLine(Line line, int parts)
+        // NEW
+        static List<Line> SplitRoute(Line line, int parts)
         {
-            double startX = line.Start.X;
-            double startY = line.Start.Y;
-            double endX = line.End.X;
-            double endY = line.End.Y;
+            List<Line> dividedLines = new List<Line>();
 
-            double xIncrement = (endX - startX) / parts;
-            double yIncrement = (endY - startY) / parts;
-
-            List<Line> splittedLines = new List<Line>();
+            double deltaX = (line.End.X - line.Start.X) / parts;
+            double deltaY = (line.End.Y - line.Start.Y) / parts;
 
             for (int i = 0; i < parts; i++)
             {
-                double newStartX = startX + (xIncrement * i);
-                double newStartY = startY + (yIncrement * i);
-                double newEndX = startX + (xIncrement * (i + 1));
-                double newEndY = startY + (yIncrement * (i + 1));
-
-                splittedLines.Add(new Line(new Point(newStartX, newStartY), new Point(newEndX, newEndY)));
+                Point newStart = new Point(line.Start.X + i * deltaX, line.Start.Y + i * deltaY);
+                Point newEnd = new Point(line.Start.X + (i + 1) * deltaX, line.Start.Y + (i + 1) * deltaY);
+                dividedLines.Add(new Line(newStart, newEnd));
             }
 
-            return splittedLines;
+            return dividedLines;
         }
 
         //FLIGHT FILTERING AND PROCESSING
         // Applies the sector flight is coming from
         private string DefineInSector(Flight flight)
         {
-            // Determine outbound sector / previous
+            // Determine in sector / previous
             List<Line> flightRoute = SplitLines(flight.SystemRoute);
 
             for (int i = 0; i < flightRoute.Count; i++)
@@ -515,8 +531,8 @@ namespace eStrips
                     if (IntersectsSector(flightRoute[i], sect) && sect.Name != "LJLA")
                     {
                         // Returns first sector the route intersects
-                        //Logging.Log($"{sect.Name}");
                         flight.InboundSector = sect.Name;
+                        if (flight.Flightplan.Adep.StartsWith("LJ")) { sect.Name = "LJLA"; }
                         return sect.Name;
                     }
                 }
@@ -527,8 +543,6 @@ namespace eStrips
         // Applies the sector the flight will be entering
         private List<string> DefineOutSector(Flight flight, string inSector)
         {
-            //int firstSectorIndex = 0;
-            //int lastSectorIndex = 0;
             List<string> crossingSectors = new List<string>();
             List<Line> flightRoute = SplitLines(flight.SystemRoute);
 
@@ -556,6 +570,12 @@ namespace eStrips
             }
 
             if (crossingSectors.Count < 2) { crossingSectors.Add("LJLA"); }
+            if (crossingSectors[0] == "LJLA" && crossingSectors.Count() >= 2) { crossingSectors.RemoveAt(0); }
+
+            string cs = string.Empty;
+            foreach (string s in crossingSectors) { cs += s + ", "; }
+
+            Logging.Log($"Sector count {flight.Callsign}: {cs}");
 
             return crossingSectors;
         }
@@ -565,7 +585,7 @@ namespace eStrips
             string inSector = DefineInSector(flight);
             List<string> outSectorList = DefineOutSector(flight, inSector);
 
-            return Tuple.Create(inSector, outSectorList[1]);
+            return Tuple.Create(inSector, outSectorList[0]);
         }
 
         private int GetQNH(string station)
@@ -679,7 +699,6 @@ namespace eStrips
                 else { continue; }
 
             }
-            Logging.Log("===========================================");
         }
 
         private List<Line> ProcessRoute(Flight flight)

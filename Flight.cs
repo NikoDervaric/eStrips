@@ -23,6 +23,7 @@ namespace eStrips
         public int ComputedFL { get; set; }
         public List<int> Loa_efls { get; set; }
         public int AppliedEFL { get; set; }
+        public int ChangedEFL { get; set; }
         public List<int> Loa_xfls { get; set; }
         public int AppliedXFL { get; set; }
         public int ChangedXFL { get; set; }
@@ -58,13 +59,13 @@ namespace eStrips
         // Najbolj restriktivnega
         public int ApplyXFL()
         {
-            if (Loa_xfls.Count == 0) { AppliedXFL = ComputedFL; }
+            if (Loa_xfls.Count == 0) { AppliedXFL = Flightplan.CruiseAlt; }
             else { AppliedXFL = Loa_xfls.Min(); }
             //Logging.Log($"XFL = XFL: {AppliedXFL}");
 
             // If XFL is greater than cruise altitude, the XFL will be set to cruise alt
             if (AppliedXFL > Flightplan.CruiseAlt && AppliedXFL != ComputedFL) { AppliedXFL = Flightplan.CruiseAlt; }
-            //Logging.Log($"XFL = RFL: {AppliedXFL}");
+            if (ChangedXFL != 0) { AppliedXFL = ChangedXFL; }
 
             return AppliedXFL;
         }
