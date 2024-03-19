@@ -105,6 +105,26 @@ namespace eStrips
             stripDataTable.Columns["xfl_column"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(255, 255, 230, 80);
         }
 
+        private void stripDataTable_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            // Check if it's the columns you want to compare
+            if (e.ColumnIndex == 1 || e.ColumnIndex == 2)
+            {
+                DataGridViewRow row = stripDataTable.Rows[e.RowIndex];
+
+                // Get values of the two columns
+                object value1 = row.Cells["planned_cleared_levels_column"].Value;
+                object value2 = row.Cells["xfl_column"].Value;
+
+                // Compare values
+                if (value1 != null && value2 != null && value1.Equals(value2))
+                {
+                    // Set the cell's fore color to red
+                    e.CellStyle.BackColor = Color.FromArgb(255, 180, 180, 180);
+                }
+            }
+        }
+
         // TIMING AND BASIC PROGRAM FUNCTIONALITY
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
@@ -830,5 +850,6 @@ namespace eStrips
             FdrModal form = new FdrModal();
             form.Show();
         }
+
     }
 }
