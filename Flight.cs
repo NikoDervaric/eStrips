@@ -67,6 +67,9 @@ namespace eStrips
             if (AppliedXFL > Flightplan.CruiseAlt && AppliedXFL != ComputedFL) { AppliedXFL = Flightplan.CruiseAlt; }
             if (ChangedXFL != 0) { AppliedXFL = ChangedXFL; }
 
+            //if (Flightplan.Ades == "LJLJ") { return ""; }
+
+            Netcode.SendCommand($"#LBALR;{AppliedXFL}");
             return AppliedXFL;
         }
 

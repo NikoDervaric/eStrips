@@ -17,11 +17,8 @@ namespace eStrips
     public partial class eStrips : Form
     {
         private static string cwd = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static string[] portFile = File.ReadAllLines($"{cwd}/.key");
 
         private System.Timers.Timer timer;
-        private const string serverAddress = "127.0.0.1";           // Replace with your server IP address
-        private static int serverPort = int.Parse(portFile[0]);     // Replace with your server port number
         public static int sendInterval = 15000;                     // Interval between sending messages (in milliseconds)
 
         public static Dictionary<string, Flight> validFlights = new Dictionary<string, Flight>();
@@ -129,7 +126,7 @@ namespace eStrips
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             // Function to execute periodically
-            string response = SendCommand("#TR");
+            string response = Netcode.SendCommand("#TR");
 
             // Process the response or perform any other actions
             // Note: Make sure to update UI controls from the main UI thread using Invoke if necessary
@@ -176,7 +173,7 @@ namespace eStrips
                 string callsignString = callsign.Value.ToString();
                 Flight tmp = validFlights[callsignString];
 
-                string[] squawk = SendCommand($"#TRSQK;{callsign.Value}").Split(';');
+                string[] squawk = Netcode.SendCommand($"#TRSQK;{callsign.Value}").Split(';');
                 if (squawk[2] == "Traffic not assumed.")
                 {
                     pssr.Value = "";
@@ -188,7 +185,7 @@ namespace eStrips
                     validFlights.Add(callsignString, tmp);
                     Logging.Log($"Value: {pssr.Value.GetType()}");
                     pssr.Value = squawk[2];
-                    SendCommand($"#LBSQK;{callsignString};{squawk[2]}");
+                    Netcode.SendCommand($"#LBSQK;{callsignString};{squawk[2]}");
                 }
                 else
                 {
@@ -431,45 +428,6 @@ namespace eStrips
             return (val > 0) ? 1 : 2;
         }
 
-        public static string SendCommand(string command)
-        {
-            string sendCommand = command + "\n";
-            try
-            {
-                using (TcpClient client = new TcpClient(serverAddress, serverPort))
-                {
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        byte[] data = Encoding.ASCII.GetBytes(sendCommand);
-                        stream.Write(data, 0, data.Length);
-
-                        // Receive the response
-                        byte[] responseBuffer = new byte[4096];
-                        using (MemoryStream memoryStream = new MemoryStream())
-                        {
-                            int bytesRead;
-                            do
-                            {
-                                bytesRead = stream.Read(responseBuffer, 0, responseBuffer.Length);
-                                memoryStream.Write(responseBuffer, 0, bytesRead);
-                            } while (stream.DataAvailable);
-
-                            // Convert the received data to a string
-                            string response = Encoding.ASCII.GetString(memoryStream.ToArray());
-                            return response;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions that occur during the process
-                Console.WriteLine("An error occurred: " + ex.Message);
-                Console.WriteLine("Make sure you are connected in Aurora and that 3rd party is enabled in settings.");
-                return null;
-            }
-        }
-
         // TABLE CHECKING AND DATA POPULATION
         private void ApplyFLColors()
         {
@@ -487,7 +445,7 @@ namespace eStrips
         {
             stripDataTable.Rows.Clear();
 
-            string response = SendCommand("#TR");
+            string response = Netcode.SendCommand("#TR");
             ValidateFlights(response);
 
             // Add the data rows to the DataGridView
@@ -610,7 +568,7 @@ namespace eStrips
 
         private int GetQNH(string station)
         {
-            string metar = SendCommand($"#METAR;{station}").Split(';')[1];
+            string metar = Netcode.SendCommand($"#METAR;{station}").Split(';')[1];
             string[] metarSplit = metar.Split(' ');
 
             foreach (string element in metarSplit)
@@ -667,14 +625,14 @@ namespace eStrips
             Logging.Log("=====ValidateFlights()=====");
             foreach (string traffic in trafficInRange)
             {
-                string fplTmp = SendCommand($"#FP;{traffic}");
+                string fplTmp = Netcode.SendCommand($"#FP;{traffic}");
                 string[] fpl = fplTmp.Split(';');
 
                 if (fpl[0] == "@ERR") continue;
 
                 if (fpl[8] == "I" && fpl[11] != "VFR")
                 {
-                    string tmpPos = SendCommand($"#TRPOS;{traffic}");
+                    string tmpPos = Netcode.SendCommand($"#TRPOS;{traffic}");
                     string[] pos = tmpPos.Split(';');
 
                     if (!int.TryParse(pos[4], out int _) || !int.TryParse(pos[5], out int _)) { continue; }
@@ -812,7 +770,7 @@ namespace eStrips
         private void eStrips_Load(object sender, EventArgs e)
         {
             TopMost = true;
-            string response = SendCommand("#TR");
+            string response = Netcode.SendCommand("#TR");
 
             ValidateFlights(response);
             PopulateDataGridView();
