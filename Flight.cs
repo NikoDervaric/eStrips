@@ -23,7 +23,6 @@ namespace eStrips
         public int ComputedFL { get; set; }
         public List<int> Loa_efls { get; set; }
         public int AppliedEFL { get; set; }
-        public int ChangedEFL { get; set; }
         public List<int> Loa_xfls { get; set; }
         public int AppliedXFL { get; set; }
         public int ChangedXFL { get; set; }
@@ -46,7 +45,9 @@ namespace eStrips
 
             ChangedXFL = 0;
             AppliedXFL = ApplyXFL();
+            if (OutboundSector == "LJLA") { AppliedXFL = 0; }
             if (ChangedXFL != 0) { AppliedXFL = ChangedXFL; }
+
             //AppliedEFL = ApplyEFL();
 
             return new string[] { $"{Callsign}", $"{AppliedEFL.ToString().PadLeft(3, '0').Substring(0, 3)}", $"{AppliedXFL.ToString().PadLeft(3, '0').Substring(0, 3)}", 
@@ -70,6 +71,7 @@ namespace eStrips
             //if (Flightplan.Ades == "LJLJ") { return ""; }
 
             Netcode.SendCommand($"#LBALR;{AppliedXFL}");
+
             return AppliedXFL;
         }
 

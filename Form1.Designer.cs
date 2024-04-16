@@ -87,6 +87,7 @@
             this.stripDataTable.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellClick);
             this.stripDataTable.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.stripDataTable_CellDoubleClick);
             this.stripDataTable.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.stripDataTable_CellFormatting);
+            this.stripDataTable.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.stripDataTable_CellPainting);
             // 
             // callsign_column
             // 

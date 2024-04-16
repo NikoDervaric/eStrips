@@ -122,6 +122,12 @@
     <Compile Include="WxWindow.Designer.cs">
       <DependentUpon>WxWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="XFLModal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XFLModal.Designer.cs">
+      <DependentUpon>XFLModal.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="FDR.resx">
       <DependentUpon>FDR.cs</DependentUpon>
     </EmbeddedResource>
@@ -148,6 +154,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WxWindow.resx">
       <DependentUpon>WxWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XFLModal.resx">
+      <DependentUpon>XFLModal.cs</DependentUpon>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="packages.config" />

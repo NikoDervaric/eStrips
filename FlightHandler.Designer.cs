@@ -41,7 +41,7 @@
             this.BtnDelete.Name = "BtnDelete";
             this.BtnDelete.Size = new System.Drawing.Size(98, 30);
             this.BtnDelete.TabIndex = 0;
-            this.BtnDelete.Text = "Close Flight";
+            this.BtnDelete.Text = "Finish strip?";
             this.BtnDelete.UseVisualStyleBackColor = true;
             this.BtnDelete.Click += new System.EventHandler(this.BtnDelete_Click);
             // 

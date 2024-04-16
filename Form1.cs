@@ -165,6 +165,7 @@ namespace eStrips
         //  Generate squawk on clicking PSSR field
         private void stripDataTable_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            //  Generate new squawk
             if (e.ColumnIndex == 10)
             {
                 DataGridViewTextBoxCell pssr = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
@@ -192,12 +193,21 @@ namespace eStrips
                     pssr.Value = string.Empty;
                 }
             }
+            //  Open strip modal
             else if (e.ColumnIndex == 0)
             {
                 DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
                 Logging.Log("Callsign: " + callsign.Value.ToString());
                 FlightHandler form = new FlightHandler(callsign.Value.ToString());
+                form.Show();
+            }
+            //  Open XFL menu
+            else if (e.ColumnIndex == 2)
+            {
+                DataGridViewTextBoxCell callsign = (DataGridViewTextBoxCell)stripDataTable.Rows[e.RowIndex].Cells[e.ColumnIndex-2];
+
+                XFLModal form = new XFLModal(callsign.Value.ToString());
                 form.Show();
             }
         }
@@ -438,6 +448,10 @@ namespace eStrips
                     row.Cells["planned_cleared_levels_column"].Style.BackColor = Color.FromArgb(255, 180, 180, 180);
                     row.Cells["xfl_column"].Style.BackColor = Color.FromArgb(255, 180, 180, 180);
                 }
+                if (row.Cells["callsign_column"].ColumnIndex == 0)
+                {
+
+                }
             }
         }
 
@@ -553,7 +567,7 @@ namespace eStrips
             string cs = string.Empty;
             foreach (string s in crossingSectors) { cs += s + ", "; }
 
-            Logging.Log($"Sector count {flight.Callsign}: {cs}");
+            //Logging.Log($"Sector count {flight.Callsign}: {cs}");
 
             return crossingSectors;
         }
@@ -597,7 +611,6 @@ namespace eStrips
                 {
                     Tuple<string, string> AppliedSectors = ApplySectors(flight);
 
-                    Logging.Log(flight.Callsign);
                     flight.InboundSector = AppliedSectors.Item1;
                     flight.OutboundSector = AppliedSectors.Item2;
                     //Logging.Log("From (O): " + flight.InboundSector + " | To (I): " + flight.OutboundSector);
@@ -752,7 +765,7 @@ namespace eStrips
 
             if(ExitLevels.ContainsKey(AKey_ADES))
             {
-                Logging.Log(AKey_ADES); //GOOD
+                Logging.Log($"{flight.Callsign}: { AKey_ADES}"); //GOOD
                 loa_xfls.Add(ExitLevels[AKey_ADES]);
             }
 
@@ -775,6 +788,12 @@ namespace eStrips
             ValidateFlights(response);
             PopulateDataGridView();
             stripDataTable.Sort(stripDataTable.Columns["planned_cleared_levels_column"], ListSortDirection.Descending);
+
+            //  Set version
+            this.Text = $"eStrips - IVAO Slovenia - {System.Reflection.Assembly.GetEntryAssembly().GetName().Version}";
+#if DEBUG
+            this.Text = $"eStrips - IVAO Slovenia - DEBUG {System.Reflection.Assembly.GetEntryAssembly().GetName().Version}";
+#endif 
         }
 
         private void BtnMeteo_MouseClick(object sender, MouseEventArgs e)
@@ -809,5 +828,131 @@ namespace eStrips
             form.Show();
         }
 
+        private void stripDataTable_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            /*if (e.ColumnIndex == 0)
+            {
+                DataGridViewRow row = stripDataTable.Rows[e.RowIndex];
+                object callsign = row.Cells["callsign_column"].Value;
+                string callsign_string = callsign.ToString();
+
+                // Specify the border width in pixels
+                int borderWidth = 3;
+
+                if (validFlights[callsign_string].Heading >= 0 && validFlights[callsign_string].Heading <= 179 || validFlights[callsign_string].Heading == 360)
+                {
+                    // Set the color of the border
+                    Color borderColor = Color.FromArgb(255, 255, 230, 80);
+                    Color backColor = Color.FromArgb(255, 180, 180, 180);
+
+                    // Get the bounds of the current cell
+                    Rectangle bounds = e.CellBounds;
+
+                    // Adjust the bounds to exclude the border width
+                    bounds.Width -= borderWidth;
+                    bounds.Height -= borderWidth;
+
+                    // Set the background color of the cell
+                    e.Graphics.FillRectangle(new SolidBrush(backColor), bounds);
+
+                    // Create a new Pen with the specified color and width
+                    Pen pen = new Pen(borderColor, borderWidth);
+
+                    // Draw the borders for all sides of the cell
+                    e.Graphics.DrawRectangle(pen, bounds);
+
+                    // Dispose of the Pen object to free resources
+                    pen.Dispose();
+
+                    // Prevent the default painting of the cell content
+                    e.Handled = true;
+
+                    // Draw the cell content
+                    if (e.Value != null)
+                    {
+                        // Adjust the bounds to leave space for the text
+                        bounds.Inflate(-borderWidth, -borderWidth);
+
+                        // Draw the text at the adjusted bounds
+                        TextRenderer.DrawText(e.Graphics, e.Value.ToString(), e.CellStyle.Font, bounds, e.CellStyle.ForeColor, TextFormatFlags.WordBreak | TextFormatFlags.VerticalCenter);
+                    }
+
+                }
+                else if (validFlights[callsign_string].Heading >= 180 && validFlights[callsign_string].Heading < 360)
+                {
+                    // Set the color of the border
+                    Color borderColor = Color.FromArgb(255, 240, 80, 80);
+                    Color backColor = Color.Black;
+
+                    // Get the bounds of the current cell
+                    Rectangle bounds = e.CellBounds;
+
+                    // Adjust the bounds to exclude the border width
+                    bounds.Width -= borderWidth;
+                    bounds.Height -= borderWidth;
+
+                    // Set the background color of the cell
+                    e.Graphics.FillRectangle(new SolidBrush(backColor), bounds);
+
+                    // Create a new Pen with the specified color and width
+                    Pen pen = new Pen(borderColor, borderWidth);
+
+                    // Draw the borders for all sides of the cell
+                    e.Graphics.DrawRectangle(pen, bounds);
+
+                    // Dispose of the Pen object to free resources
+                    pen.Dispose();
+
+                    // Prevent the default painting of the cell content
+                    e.Handled = true;
+
+                    // Draw the cell content
+                    if (e.Value != null)
+                    {
+                        // Adjust the bounds to leave space for the text
+                        bounds.Inflate(-borderWidth, -borderWidth);
+
+                        // Draw the text at the adjusted bounds
+                        TextRenderer.DrawText(e.Graphics, e.Value.ToString(), e.CellStyle.Font, bounds, e.CellStyle.ForeColor, TextFormatFlags.WordBreak | TextFormatFlags.VerticalCenter);
+                    }
+                }
+            }
+            else if (e.ColumnIndex != 0) // For cells in other columns, paint the background color
+            {
+                // Fill the background of the cell with its default color
+                e.PaintBackground(e.CellBounds, true);
+
+                // Indicate that the cell painting is handled
+                e.Handled = true;
+            }*/
+
+            /*DataGridViewRow row = stripDataTable.Rows[e.RowIndex];
+            object callsign = row.Cells["callsign_column"].Value;
+            string callsign_string = callsign.ToString();
+
+            if (e.ColumnIndex == 0 && e.RowIndex > 1)
+            {
+                if (validFlights[callsign_string].Heading >= 0 && validFlights[callsign_string].Heading <= 179 || validFlights[callsign_string].Heading == 360)
+                {
+                    e.Handled = true;
+                    using (Brush b = new SolidBrush(Color.FromArgb(255, 180, 180, 180)))
+                    {
+                        e.Graphics.FillRectangle(b, e.CellBounds);
+                    }
+                    using (Pen p = new Pen(Color.FromArgb(255, 255, 230, 80), 4))
+                    {
+                        p.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+                        e.Graphics.DrawLine(p, new System.Drawing.Point(0, e.CellBounds.Bottom - 1), new System.Drawing.Point(e.CellBounds.Right, e.CellBounds.Bottom - 1));
+                        e.Graphics.DrawLine(p, new System.Drawing.Point(e.CellBounds.Left, e.CellBounds.Top), new System.Drawing.Point(e.CellBounds.Left, e.CellBounds.Bottom));
+                        e.Graphics.DrawLine(p, new System.Drawing.Point(e.CellBounds.Right, e.CellBounds.Top), new System.Drawing.Point(e.CellBounds.Right, e.CellBounds.Bottom));
+                    }
+                    e.PaintContent(e.ClipBounds);
+                }*/
+                /*else if (validFlights[callsign_string].Heading >= 180 && validFlights[callsign_string].Heading < 360)
+                {
+
+                }
+            }*/
+        }
     }
 }
