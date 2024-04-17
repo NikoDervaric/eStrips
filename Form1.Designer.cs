@@ -47,6 +47,7 @@
             this.BtnLoa = new System.Windows.Forms.Button();
             this.BtnCharts = new System.Windows.Forms.Button();
             this.BtnFlights = new System.Windows.Forms.Button();
+            this.PnlTop = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.stripDataTable)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,8 +74,8 @@
             this.pssr_column,
             this.assr_column,
             this.frf_column});
-            this.stripDataTable.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.stripDataTable.Location = new System.Drawing.Point(0, 59);
+            this.stripDataTable.Dock = System.Windows.Forms.DockStyle.Top;
+            this.stripDataTable.Location = new System.Drawing.Point(0, 56);
             this.stripDataTable.Margin = new System.Windows.Forms.Padding(0);
             this.stripDataTable.MultiSelect = false;
             this.stripDataTable.Name = "stripDataTable";
@@ -310,6 +311,14 @@
             this.BtnFlights.UseVisualStyleBackColor = false;
             this.BtnFlights.Click += new System.EventHandler(this.BtnFlights_Click);
             // 
+            // PnlTop
+            // 
+            this.PnlTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PnlTop.Location = new System.Drawing.Point(0, 0);
+            this.PnlTop.Name = "PnlTop";
+            this.PnlTop.Size = new System.Drawing.Size(1039, 56);
+            this.PnlTop.TabIndex = 5;
+            // 
             // eStrips
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -322,6 +331,7 @@
             this.Controls.Add(this.BtnLoa);
             this.Controls.Add(this.BtnMeteo);
             this.Controls.Add(this.stripDataTable);
+            this.Controls.Add(this.PnlTop);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1055, 692);
             this.Name = "eStrips";
@@ -352,6 +362,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn pssr_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn assr_column;
         private System.Windows.Forms.DataGridViewTextBoxColumn frf_column;
+        private System.Windows.Forms.Panel PnlTop;
     }
 }
 

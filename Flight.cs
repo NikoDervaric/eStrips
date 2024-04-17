@@ -70,7 +70,7 @@ namespace eStrips
 
             //if (Flightplan.Ades == "LJLJ") { return ""; }
 
-            Netcode.SendCommand($"#LBALR;{AppliedXFL}");
+            Netcode.SendCommand($"#LBALR;{Callsign};{AppliedXFL}");
 
             return AppliedXFL;
         }
